@@ -27,7 +27,7 @@ from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, core, Dropout
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from keras import backend as K
-
+from keras.preprocessing.image import ImageDataGenerator
 from keras.optimizers import SGD
 
 import sys
@@ -77,7 +77,7 @@ def get_nucleiNet(n_ch,patch_height,patch_width,learning_rate):
 
     # sgd = SGD(lr=0.01, decay=1e-6, momentum=0.3, nesterov=False)
     model.compile(optimizer=optimizers.Adam(lr=learning_rate), loss='categorical_crossentropy',metrics=['accuracy'])
-
+#    model.compile(optimizer='sgd', loss='categorical_crossentropy',metrics=['accuracy'])
     return model
 
 
@@ -92,7 +92,9 @@ name_experiment = config.get('experiment name', 'name')
 #training settings
 N_epochs = int(config.get('training settings', 'N_epochs'))
 batch_size = int(config.get('training settings', 'batch_size'))
-learning_rate = int(config.get('training settings', 'learning_rate'))
+learning_rate = float(config.get('training settings', 'learning_rate'))
+N_subimgs = int(config.get('training settings', 'N_subimgs'))
+
 
 #============ Load the data and divided in patches
 #mask is a 3d array
@@ -101,7 +103,7 @@ patches_imgs_train, patches_masks_train = get_data_training(
     hdf5_train_groundTruth = path_data + config.get('data paths', 'train_groundTruth'),  #masks
     patch_height = int(config.get('data attributes', 'patch_height')),
     patch_width = int(config.get('data attributes', 'patch_width')),
-    N_subimgs = int(config.get('training settings', 'N_subimgs'))
+    N_subimgs = N_subimgs
 )
 
 
@@ -117,6 +119,7 @@ n_ch = patches_imgs_train.shape[1]
 patch_height = patches_imgs_train.shape[2]
 patch_width = patches_imgs_train.shape[3]
 
+print("Check: input shape: {},{},{}".format(n_ch,patch_height,patch_width))
 model = get_nucleiNet(n_ch, patch_height, patch_width,learning_rate)  #the nucleiNet model
 print("Check: final output of the network:")
 print(model.output_shape)
@@ -158,10 +161,29 @@ class_distribution_train(patches_masks_train)
 
 print("Done with parse masks")
 #train the model with number of batches and number of batch_size
-model.fit(patches_imgs_train, patches_masks_train, nb_epoch=N_epochs, batch_size=batch_size, verbose=2, shuffle=True, validation_split=0.1, callbacks=[checkpointer])
+
+##========== Data augmentation =============================
+#datagen = ImageDataGenerator(
+#        horizontal_flip = True,
+#        vertical_flip = True,
+#        data_format='channels_first')
+
+
+#========= Training =====================================
+
+#model.fit_generator(datagen.flow(patches_imgs_train,patches_masks_train,batch_size=batch_size),
+#                              steps_per_epoch=N_subimgs/batch_size,
+#                              epochs = N_epochs,verbose=2) 
+
+model.fit(patches_imgs_train, patches_masks_train, nb_epoch=N_epochs, 
+          batch_size=batch_size, verbose=2, shuffle=True, validation_split=0.1, 
+          callbacks=[checkpointer])
 
 #========== Save and test the last model ===================
 model.save_weights('./weights/' + name_experiment + '/' + name_experiment + '_last_weights.h5', overwrite=True)
+
+
+
 
 #dev the model
 # score = model.evaluate(patches_imgs_dev, masks_Unet(patches_masks_dev), verbose=0)

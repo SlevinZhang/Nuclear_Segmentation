@@ -2,11 +2,8 @@
 path_local =  ./hdf_dataset/
 train_imgs_original = dataset_imgs_train.hdf5
 train_groundTruth = dataset_masks_train.hdf5
-
 test_imgs_original = sameorgan_imgs_test.hdf5
 test_groundTruth = sameorgan_masks_test.hdf5
-
-
 
 
 [experiment name]
@@ -23,9 +20,9 @@ patch_width = 51
 #number of total patches:
 N_subimgs = 144000
 #Number of training epochs
-N_epochs = 50
-batch_size = 32
-learning_rate = 0.005
+N_epochs = 100
+batch_size = 100
+learning_rate = 0.0001
 
 
 [testing settings]
