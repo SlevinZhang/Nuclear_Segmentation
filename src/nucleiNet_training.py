@@ -128,21 +128,26 @@ N_subimgs = int(config.get('training settings', 'N_subimgs'))
 
 #============ Load the data and divided in patches
 #mask is a 3d array
-patches_imgs_train, patches_masks_train = get_data_training(
-    hdf5_train_imgs = path_data + config.get('data paths', 'train_imgs_original'),
-    hdf5_train_groundTruth = path_data + config.get('data paths', 'train_groundTruth'),  #masks
-    patch_height = int(config.get('data attributes', 'patch_height')),
-    patch_width = int(config.get('data attributes', 'patch_width')),
-    N_subimgs = N_subimgs
-)
+#patches_imgs_train, patches_masks_train = get_data_training(
+#    hdf5_train_imgs = path_data + config.get('data paths', 'train_imgs_original'),
+#    hdf5_train_groundTruth = path_data + config.get('data paths', 'train_groundTruth'),  #masks
+#    patch_height = int(config.get('data attributes', 'patch_height')),
+#    patch_width = int(config.get('data attributes', 'patch_width')),
+#    N_subimgs = N_subimgs
+#)
+#Load in normaized data
+patches_imgs_train = load_hdf5('./hdf_dataset/normalized_dataset_patches_imgs_train.hdf5')
+patches_masks_train = load_hdf5('./hdf_dataset/normalized_dataset_patches_masks_train.hdf5')
+
+
 
 
 #========= Save and visualize a sample of what you're feeding to the neural network ==========
 N_sample = 40
 visualize(group_images(patches_imgs_train[0:N_sample,:,:,:],5),'./Result/'+name_experiment+'/'+"sample_input_imgs")#.show()
-inside_mask,boundary_mask = parse_mask(patches_masks_train[0:N_sample,:,:,:])
-visualize(group_images(inside_mask,5),'./Result/'+name_experiment+'/'+"inside_mask")#.show()
-visualize(group_images(boundary_mask,5),'./Result/'+name_experiment+'/'+'boundary_mask')
+#inside_mask,boundary_mask = parse_mask(patches_masks_train[0:N_sample,:,:,:])
+#visualize(group_images(inside_mask,5),'./Result/'+name_experiment+'/'+"inside_mask")#.show()
+#visualize(group_images(boundary_mask,5),'./Result/'+name_experiment+'/'+'boundary_mask')
 
 #=========== Construct and save the model arcitecture =====
 n_ch = patches_imgs_train.shape[1]
@@ -187,9 +192,9 @@ checkpointer = ModelCheckpoint(filepath='./weights/' + name_experiment + '/' +na
 # lrate_drop = LearningRateScheduler(step_decay)
 
 #==============Calculate class distribution in patches===========================
-patches_masks_train = masks_nucleiNet(patches_masks_train)
+#patches_masks_train = masks_nucleiNet(patches_masks_train)
 #patches_masks_train = category_masks(patches_masks_train)
-class_distribution_train(patches_masks_train[:7000])
+class_distribution_train(patches_masks_train[:3000])
 
 
 print("Done with parse masks")
@@ -212,7 +217,7 @@ print("Done with parse masks")
 #patches_masks_train = tf.one_hot(patches_masks_train,3)
 #print(np.shape(patches_masks_train))
 
-model.fit(patches_imgs_train[:7000], patches_masks_train[:7000], epochs=N_epochs, 
+model.fit(patches_imgs_train[:3000], patches_masks_train[:3000], epochs=N_epochs, 
           batch_size=batch_size, verbose=2, shuffle=True, validation_split=0.01, 
           callbacks=[checkpointer])
 
