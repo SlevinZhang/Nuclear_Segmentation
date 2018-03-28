@@ -48,7 +48,7 @@ def aji(y_predicts, y_groundtruth):
     pass
 
 def get_resNet(n_ch, patch_height, patch_width, learning_rate):
-    base_model = vgg16.VGG16(weights='imagenet',input_shape=(n_ch,patch_height,patch_width))
+    base_model = vgg16.VGG16(input_shape=(n_ch,patch_height,patch_width))
     last = base_model.layers[-2].output
     predictions = Dense(3,activation='softmax')(last)
     model = Model(input = base_model.input, output = predictions)
