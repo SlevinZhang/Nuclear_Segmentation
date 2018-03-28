@@ -27,7 +27,7 @@ import glob
 import sys
 sys.path.insert(0, './lib/')
 from help_functions import *
-
+import random
 #save the data
 def write_hdf5(arr,outfile):
   with h5py.File(outfile,"w") as f:
@@ -100,12 +100,79 @@ def get_datasets(imgs_dir,mask_dir,Nimgs):
     
     return imgs,masks
 
+#because images don't have the same size, so we also extract patches from it and save patches into hdf5
+def get_normalized_datasets(imgs_dir, mask_dir):
+    image_filenames = glob.glob(imgs_dir + '*')
+    Nimgs = 810000
+    patch_w = 51
+    patch_h = 51
+    channels = 3
+    
+    img_patches = np.empty((Nimgs, patch_h, patch_w, channels))
+    
+    mask_patches = np.empty((Nimgs, 3))
+    
+    iter_tot = 0
+    for index,filename in enumerate(image_filenames):
+        k = 0
+        basename = os.path.basename(filename)
+        print("original image: " + basename)
+        img = Image.open(filename)
+        img_w, img_h = img.size
+        patch_per_class = 3000
+        
+        
+        mask_filename = mask_dir + 'TM_' + basename.split('.')[0] + '.png'
+        mask = Image.open(mask_filename)
+        img_array = np.asarray(img)
+        mask_array = np.asarray(mask)
+        
+        counter = {0:0,1:0,2:0}
+        
+        while k < 9000:
+            
+            x_center = random.randint(0+int(patch_w/2),img_w - int(patch_w/2) - 1)
+            
+            y_center = random.randint(0+int(patch_h/2),img_h - int(patch_h/2) - 1)
 
+            # 0 is background
+            # 1 is boundary
+            # 2 is inside
+            center_label = int(mask_array[y_center,x_center]/127)
+            
+            if counter[center_label] < patch_per_class:
+#                print("image:{}, {} class has: {}".format(i,full_masks[i,0,y_center,x_center],counter[full_masks[i,0,y_center,x_center]]))
+                patch_img = img_array[:,y_center - int(patch_h/2):y_center + int(patch_h/2)+1,x_center - int(patch_w/2):x_center + int(patch_w/2) + 1]
+                
+                img_patches[iter_tot] = patch_img
+                if  center_label == 0:
+                    mask_patches[iter_tot,0]=1
+                    mask_patches[iter_tot,1]=0
+                    mask_patches[iter_tot,2]=0
+                elif center_label == 1:
+                    mask_patches[iter_tot,0]=0
+                    mask_patches[iter_tot,1]=1
+                    mask_patches[iter_tot,2]=0
+                    
+                else:
+                    mask_patches[iter_tot,0]=0
+                    mask_patches[iter_tot,1]=0
+                    mask_patches[iter_tot,2]=1
+                    
+                counter[center_label] += 1
+                iter_tot += 1
+                k += 1
+        
+    img_patches = np.transpose(img_patches,(0,3,1,2))
+    assert(img_patches.shape == (Nimgs,channels,patch_h,patch_w))
+    assert(mask_patches.shape == (Nimgs,3))
+    return img_patches, mask_patches
+    
 if __name__ == '__main__':
     #------------Path of the images --------------------------------------------------------------
-    train_images = './dataset/train_images/'
-    mask_path = './dataset/intBinMask/'
-    test_images = './dataset/test_images/'
+    train_images = './normalized_dataset/images/'
+    mask_path = '../normalized_dataset/images/'
+#    test_images = './dataset/test_images/'
     #---------------------------------------------------------------------------------------------
     dataset_root = "./hdf_dataset/"
     
@@ -113,13 +180,13 @@ if __name__ == '__main__':
         os.makedirs(dataset_root)
 
     #getting the training datasets
-    imgs_train, masks_train = get_datasets(train_images,mask_path,24)
+    imgs_train, masks_train = get_normalized_datasets(train_images,mask_path)
 #    print "saving train datasets"
-    write_hdf5(imgs_train, dataset_root + "dataset_imgs_train.hdf5")
-    write_hdf5(masks_train, dataset_root + "dataset_masks_train.hdf5")
+    write_hdf5(imgs_train, dataset_root + "normalized_dataset_patches_imgs_train.hdf5")
+    write_hdf5(masks_train, dataset_root + "normalized_dataset_patches_masks_train.hdf5")
 
-    #getting the same organ testing datasets
-    imgs_test, masks_test = get_datasets(test_images,mask_path,6)
-#    print "saving test datasets"
-    write_hdf5(imgs_test,dataset_root + "sameorgan_imgs_test.hdf5")
-    write_hdf5(masks_test, dataset_root + "sameorgan_masks_test.hdf5")
+#    #getting the same organ testing datasets
+#    imgs_test, masks_test = get_datasets(test_images,mask_path,6)
+##    print "saving test datasets"
+#    write_hdf5(imgs_test,dataset_root + "sameorgan_imgs_test.hdf5")
+#    write_hdf5(masks_test, dataset_root + "sameorgan_masks_test.hdf5")
