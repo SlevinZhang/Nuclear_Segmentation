@@ -141,7 +141,10 @@ patch_height = patches_imgs_train.shape[2]
 patch_width = patches_imgs_train.shape[3]
 
 print("Check: input shape: {},{},{}".format(n_ch,patch_height,patch_width))
-model = get_nucleiNet(n_ch, patch_height, patch_width,learning_rate)  #the nucleiNet model
+#model = get_nucleiNet(n_ch, patch_height, patch_width,learning_rate)  #the nucleiNet model
+
+model = get_resNet(n_ch, patch_height,patch_width,learning_rate) # the resNet model
+
 print("Check: final output of the network:")
 print(model.output_shape)
 
