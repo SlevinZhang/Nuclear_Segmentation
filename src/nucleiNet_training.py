@@ -49,9 +49,12 @@ def aji(y_predicts, y_groundtruth):
 
 def get_resNet(n_ch, patch_height, patch_width, learning_rate):
     base_model = vgg16.VGG16(include_top=False,input_shape=(n_ch,patch_height,patch_width))
-    last = base_model.layers[-2].output
+    last = base_model.outputs
+    print("the input shape of base model: {}".format(base_model.inputs))
+    print(last)
     predictions = Dense(3,activation='softmax')(last)
-    model = Model(input = base_model.input, output = predictions)
+    
+    model = Model(input = base_model.inputs, output = predictions)
     
     model.compile(model.compile(optimizer=optimizers.Adam(lr=learning_rate, beta_1=0.9,
                                                 beta_2=0.99),
