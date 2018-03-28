@@ -51,15 +51,15 @@ def get_nucleiNet(n_ch,patch_height,patch_width,learning_rate):
     inputs = Input(shape=(n_ch,patch_height,patch_width))
     conv1 = Conv2D(25, (4, 4), activation='relu', padding='same',data_format='channels_first')(inputs)
     conv1 = Dropout(0.1)(conv1)
-    pool1 = MaxPooling2D((2, 2))(conv1)
+    pool1 = MaxPooling2D((2, 2),data_format='channels_first')(conv1)
     #
     conv2 = Conv2D(50, (5, 5), activation='relu', padding='same',data_format='channels_first')(pool1)
     conv2 = Dropout(0.2)(conv2)
-    pool2 = MaxPooling2D((2, 2))(conv2)
+    pool2 = MaxPooling2D((2, 2),data_format='channels_first')(conv2)
     #
     conv3 = Conv2D(80, (6, 6), activation='relu', padding='same',data_format='channels_first')(pool2)
     conv3 = Dropout(0.25)(conv3)
-    pool3 = MaxPooling2D((2,2))(conv3)
+    pool3 = MaxPooling2D((2,2),data_format='channels_first')(conv3)
     
     #Flatten out
     pool3 = Flatten()(pool3)
