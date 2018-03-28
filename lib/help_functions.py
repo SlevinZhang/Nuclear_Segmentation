@@ -94,23 +94,22 @@ def category_masks(masks):
     assert (masks.shape[1]==1 )  #check the channel is 1
     im_h = masks.shape[2]
     im_w = masks.shape[3]
-    new_masks = np.empty((masks.shape[0],1))
+    new_masks = np.empty((masks.shape[0]))
     for i in range(masks.shape[0]):
         if  masks[i,0,int(im_h/2),int(im_w/2)] == 0:
-            new_masks[i,0]=0
+            new_masks[i]=0
         elif masks[i,0,int(im_h/2),int(im_w/2)] == 1:
-            new_masks[i,0]=1
+            new_masks[i]=1
         else:
-            new_masks[i,0]=2
+            new_masks[i]=2
     return new_masks
 
 #determine the distribution of class 
 def class_distribution_train(ground_truth):
 
-    assert(len(ground_truth.shape) == 2)
     positive = {0:0,1:0,2:0}
     
-    if ground_truth.shape[1] == 1:
+    if len(ground_truth.shape) == 1:
 
         for index in range(len(ground_truth)):
         if ground_truth[index][0] == 0

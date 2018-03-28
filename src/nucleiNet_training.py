@@ -32,6 +32,7 @@ from keras.optimizers import SGD
 from keras.applications import vgg16
 
 import sklearn.preprocessing as press
+import tensorflow as tf
 
 import sys
 import os
@@ -208,7 +209,7 @@ print("Done with parse masks")
 #                              epochs = N_epochs,verbose=2) 
 
 #convert to one-hot coded label
-patches_masks_train = press.OneHotEncoder(3,patches_masks_train)
+patches_masks_train = tf.one_hot(patches_masks_train,3)
 print(np.shape(patches_masks_train))
 
 model.fit(patches_imgs_train[:7000], patches_masks_train[:7000], epochs=N_epochs, 
