@@ -149,9 +149,9 @@ patch_height = patches_imgs_train.shape[2]
 patch_width = patches_imgs_train.shape[3]
 
 print("Check: input shape: {},{},{}".format(n_ch,patch_height,patch_width))
-#model = get_nucleiNet(n_ch, patch_height, patch_width,learning_rate)  #the nucleiNet model
+model = get_nucleiNet(n_ch, patch_height, patch_width,learning_rate)  #the nucleiNet model
 
-model = get_resNet(n_ch, patch_height,patch_width,learning_rate) # the resNet model
+#model = get_resNet(n_ch, patch_height,patch_width,learning_rate) # the resNet model
 
 print("Check: final output of the network:")
 print(model.output_shape)
@@ -189,7 +189,7 @@ checkpointer = ModelCheckpoint(filepath='./weights/' + name_experiment + '/' +na
 #==============Calculate class distribution in patches===========================
 patches_masks_train = masks_nucleiNet(patches_masks_train)
 
-class_distribution_train(patches_masks_train)
+class_distribution_train(patches_masks_train[:6000])
 
 
 print("Done with parse masks")
@@ -208,7 +208,7 @@ print("Done with parse masks")
 #                              steps_per_epoch=N_subimgs/batch_size,
 #                              epochs = N_epochs,verbose=2) 
 
-model.fit(patches_imgs_train, patches_masks_train, nb_epoch=N_epochs, 
+model.fit(patches_imgs_train[:6000], patches_masks_train[:6000], nb_epoch=N_epochs, 
           batch_size=batch_size, verbose=2, shuffle=True, validation_split=0.1, 
           callbacks=[checkpointer])
 
