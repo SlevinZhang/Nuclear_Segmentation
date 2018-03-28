@@ -103,10 +103,9 @@ def get_datasets(imgs_dir,mask_dir,Nimgs):
 #because images don't have the same size, so we also extract patches from it and save patches into hdf5
 def get_normalized_datasets(imgs_dir, mask_dir):
     image_filenames = glob.glob(imgs_dir + '*')
-    Nimgs = 810000
+    Nimgs = 27000
     patch_w = 51
     patch_h = 51
-    channels = 3
     
     img_patches = np.empty((Nimgs, patch_h, patch_w, channels))
     
@@ -119,7 +118,7 @@ def get_normalized_datasets(imgs_dir, mask_dir):
         print("original image: " + basename)
         img = Image.open(filename)
         img_w, img_h = img.size
-        patch_per_class = 3000
+        patch_per_class = 1000
         
         
         mask_filename = mask_dir + 'TM_' + basename.split('.')[0] + '.png'
@@ -129,7 +128,7 @@ def get_normalized_datasets(imgs_dir, mask_dir):
         
         counter = {0:0,1:0,2:0}
         
-        while k < 9000:
+        while k < 3000:
             
             x_center = random.randint(0+int(patch_w/2),img_w - int(patch_w/2) - 1)
             
@@ -142,7 +141,7 @@ def get_normalized_datasets(imgs_dir, mask_dir):
             
             if counter[center_label] < patch_per_class:
 #                print("image:{}, {} class has: {}".format(i,full_masks[i,0,y_center,x_center],counter[full_masks[i,0,y_center,x_center]]))
-                patch_img = img_array[:,y_center - int(patch_h/2):y_center + int(patch_h/2)+1,x_center - int(patch_w/2):x_center + int(patch_w/2) + 1]
+                patch_img = img_array[y_center - int(patch_h/2):y_center + int(patch_h/2)+1,x_center - int(patch_w/2):x_center + int(patch_w/2) + 1,:]
                 
                 img_patches[iter_tot] = patch_img
                 if  center_label == 0:
@@ -162,7 +161,7 @@ def get_normalized_datasets(imgs_dir, mask_dir):
                 counter[center_label] += 1
                 iter_tot += 1
                 k += 1
-        
+        print(counter)
     img_patches = np.transpose(img_patches,(0,3,1,2))
     assert(img_patches.shape == (Nimgs,channels,patch_h,patch_w))
     assert(mask_patches.shape == (Nimgs,3))
@@ -171,7 +170,7 @@ def get_normalized_datasets(imgs_dir, mask_dir):
 if __name__ == '__main__':
     #------------Path of the images --------------------------------------------------------------
     train_images = './normalized_dataset/images/'
-    mask_path = '../normalized_dataset/images/'
+    mask_path = './normalized_dataset/masks/'
 #    test_images = './dataset/test_images/'
     #---------------------------------------------------------------------------------------------
     dataset_root = "./hdf_dataset/"
