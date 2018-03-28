@@ -51,10 +51,9 @@ def get_resNet(n_ch, patch_height, patch_width, learning_rate):
     base_model = vgg16.VGG16(include_top=False,input_shape=(n_ch,patch_height,patch_width))
     last = base_model.layers[-1].output
     print("output: {}".format(last))
-    last = Flatten()(last)
-
-    print("Flatten: {}".format(last))
-    fc1 = Dense(1024,activation='relu')(last)
+    flat = Flatten()(last)
+    print("Flatten: {}".format(flat))
+    fc1 = Dense(1024,activation='relu')(flat)
     fc2 = Dense(1024,activation='relu')(fc1)
 
     predictions = Dense(3,activation='softmax')(fc2)
@@ -72,25 +71,25 @@ def get_nucleiNet(n_ch,patch_height,patch_width,learning_rate):
     
     inputs = Input(shape=(n_ch,patch_height,patch_width))
     conv1 = Conv2D(25, (4, 4), activation='relu', padding='same',data_format='channels_first')(inputs)
-    conv1 = Dropout(0.1)(conv1)
+    #conv1 = Dropout(0.1)(conv1)
     pool1 = MaxPooling2D((2, 2),data_format='channels_first')(conv1)
     #
     conv2 = Conv2D(50, (5, 5), activation='relu', padding='same',data_format='channels_first')(pool1)
-    conv2 = Dropout(0.2)(conv2)
+    #conv2 = Dropout(0.2)(conv2)
     pool2 = MaxPooling2D((2, 2),data_format='channels_first')(conv2)
     #
     conv3 = Conv2D(80, (6, 6), activation='relu', padding='same',data_format='channels_first')(pool2)
-    conv3 = Dropout(0.25)(conv3)
+    #conv3 = Dropout(0.25)(conv3)
     pool3 = MaxPooling2D((2,2),data_format='channels_first')(conv3)
     
     #Flatten out
     pool3 = Flatten()(pool3)
     
     fc1 = Dense(1024, activation='relu')(pool3)
-    fc1 = Dropout(0.5)(fc1)
+    #fc1 = Dropout(0.5)(fc1)
     
     fc2 = Dense(1024, activation='relu')(fc1)
-    fc2 = Dropout(0.5)(fc2)
+    #fc2 = Dropout(0.5)(fc2)
     
     fc3 = Dense(3, activation='softmax')(fc2)
 
@@ -150,7 +149,6 @@ patch_width = patches_imgs_train.shape[3]
 
 print("Check: input shape: {},{},{}".format(n_ch,patch_height,patch_width))
 model = get_nucleiNet(n_ch, patch_height, patch_width,learning_rate)  #the nucleiNet model
-
 #model = get_resNet(n_ch, patch_height,patch_width,learning_rate) # the resNet model
 
 print("Check: final output of the network:")
@@ -189,7 +187,7 @@ checkpointer = ModelCheckpoint(filepath='./weights/' + name_experiment + '/' +na
 #==============Calculate class distribution in patches===========================
 patches_masks_train = masks_nucleiNet(patches_masks_train)
 
-class_distribution_train(patches_masks_train[:6000])
+class_distribution_train(patches_masks_train[:7000])
 
 
 print("Done with parse masks")
@@ -208,8 +206,8 @@ print("Done with parse masks")
 #                              steps_per_epoch=N_subimgs/batch_size,
 #                              epochs = N_epochs,verbose=2) 
 
-model.fit(patches_imgs_train[:6000], patches_masks_train[:6000], nb_epoch=N_epochs, 
-          batch_size=batch_size, verbose=2, shuffle=True, validation_split=0.1, 
+model.fit(patches_imgs_train[:7000], patches_masks_train[:7000], epochs=N_epochs, 
+          batch_size=batch_size, verbose=2, shuffle=True, validation_split=0.01, 
           callbacks=[checkpointer])
 
 #========== Save and test the last model ===================
