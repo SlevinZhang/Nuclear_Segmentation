@@ -88,19 +88,46 @@ def masks_nucleiNet(masks):
                 new_masks[i,1]=0
                 new_masks[i,2]=1
     return new_masks
+#another way to generate masks
+def category_masks(masks):
+    assert (len(masks.shape)==4)  #4D arrays
+    assert (masks.shape[1]==1 )  #check the channel is 1
+    im_h = masks.shape[2]
+    im_w = masks.shape[3]
+    new_masks = np.empty((masks.shape[0],1))
+    for i in range(masks.shape[0]):
+        if  masks[i,0,int(im_h/2),int(im_w/2)] == 0:
+            new_masks[i,0]=0
+        elif masks[i,0,int(im_h/2),int(im_w/2)] == 1:
+            new_masks[i,0]=1
+        else:
+            new_masks[i,0]=2
+    return new_masks
 
 #determine the distribution of class 
 def class_distribution_train(ground_truth):
 
     assert(len(ground_truth.shape) == 2)
     positive = {0:0,1:0,2:0}
-    for index in range(len(ground_truth)):
-        if (ground_truth[index] == np.array([1,0,0])).all():
+    
+    if ground_truth.shape[1] == 1:
+
+        for index in range(len(ground_truth)):
+        if ground_truth[index][0] == 0
             positive[0] += 1
-        elif (ground_truth[index] == np.array([0,1,0])).all(): 
+        elif ground_truth[index][0] == 1: 
             positive[1] += 1
         else:
             positive[2] += 1
+
+    else:
+        for index in range(len(ground_truth)):
+            if (ground_truth[index] == np.array([1,0,0])).all():
+                positive[0] += 1
+            elif (ground_truth[index] == np.array([0,1,0])).all(): 
+                positive[1] += 1
+            else:
+                positive[2] += 1
 
     for key in positive.keys():
         print("Percent of {} in dataset: {} ".format(str(key),str(positive[key]/len(ground_truth))))
