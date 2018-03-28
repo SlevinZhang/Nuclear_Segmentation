@@ -187,8 +187,8 @@ checkpointer = ModelCheckpoint(filepath='./weights/' + name_experiment + '/' +na
 # lrate_drop = LearningRateScheduler(step_decay)
 
 #==============Calculate class distribution in patches===========================
-#patches_masks_train = masks_nucleiNet(patches_masks_train)
-patches_masks_train = category_masks(patches_masks_train)
+patches_masks_train = masks_nucleiNet(patches_masks_train)
+#patches_masks_train = category_masks(patches_masks_train)
 class_distribution_train(patches_masks_train[:7000])
 
 
@@ -209,8 +209,8 @@ print("Done with parse masks")
 #                              epochs = N_epochs,verbose=2) 
 
 #convert to one-hot coded label
-patches_masks_train = tf.one_hot(patches_masks_train,3)
-print(np.shape(patches_masks_train))
+#patches_masks_train = tf.one_hot(patches_masks_train,3)
+#print(np.shape(patches_masks_train))
 
 model.fit(patches_imgs_train[:7000], patches_masks_train[:7000], epochs=N_epochs, 
           batch_size=batch_size, verbose=2, shuffle=True, validation_split=0.01, 

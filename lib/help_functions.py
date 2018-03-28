@@ -112,12 +112,12 @@ def class_distribution_train(ground_truth):
     if len(ground_truth.shape) == 1:
 
         for index in range(len(ground_truth)):
-        if ground_truth[index][0] == 0
-            positive[0] += 1
-        elif ground_truth[index][0] == 1: 
-            positive[1] += 1
-        else:
-            positive[2] += 1
+            if ground_truth[index] == 0:
+                positive[0] += 1
+            elif ground_truth[index] == 1: 
+                positive[1] += 1
+            else:
+                positive[2] += 1
 
     else:
         for index in range(len(ground_truth)):
