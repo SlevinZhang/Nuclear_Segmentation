@@ -75,9 +75,13 @@ def get_nucleiNet(n_ch,patch_height,patch_width,learning_rate):
 
     model = Model(input=inputs, output=fc3)
 
-    # sgd = SGD(lr=0.01, decay=1e-6, momentum=0.3, nesterov=False)
-    model.compile(optimizer=optimizers.Adam(lr=learning_rate), loss='categorical_crossentropy',metrics=['accuracy'])
-#    model.compile(optimizer='sgd', loss='categorical_crossentropy',metrics=['accuracy'])
+#    #Adam optimizer
+#    model.compile(optimizer=optimizers.Adam(lr=learning_rate), loss='categorical_crossentropy',metrics=['accuracy'])
+#    
+    #SGD optimizer
+    sgd = SGD(lr=0.001, decay=0.0005, momentum=0.9, nesterov=False)
+    model.compile(optimizer=sgd, loss='categorical_crossentropy',metrics=['accuracy'])
+    
     return model
 
 
