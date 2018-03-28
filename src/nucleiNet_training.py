@@ -29,6 +29,8 @@ from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator
 from keras.optimizers import SGD
+from keras.applications import vgg16
+
 
 import sys
 import os
@@ -45,6 +47,18 @@ def aji(y_predicts, y_groundtruth):
     '''
     pass
 
+def get_resNet(n_ch, patch_height, patch_width, learning_rate):
+    base_model = vgg16.VGG16(weights='imagenet',input_shape=(n_ch,patch_height,patch_width))
+    last = base_model.layers[-2].output
+    predictions = Dense(3,activation='softmax')(last)
+    model = Model(input = base_model.input, output = predictions)
+    
+    model.compile(model.compile(optimizer=optimizers.Adam(lr=learning_rate, beta_1=0.9,
+                                                beta_2=0.99),
+                      loss='categorical_crossentropy',
+                      metrics=['accuracy']))
+    return model
+    
 #Define the neural network
 def get_nucleiNet(n_ch,patch_height,patch_width,learning_rate):
     
@@ -70,8 +84,7 @@ def get_nucleiNet(n_ch,patch_height,patch_width,learning_rate):
     fc2 = Dense(1024, activation='relu')(fc1)
     fc2 = Dropout(0.5)(fc2)
     
-    fc3 = Dense(3, activation='relu')(fc2)
-    fc3 = core.Activation('softmax')(fc3)
+    fc3 = Dense(3, activation='softmax')(fc2)
 
     model = Model(input=inputs, output=fc3)
 
@@ -84,6 +97,10 @@ def get_nucleiNet(n_ch,patch_height,patch_width,learning_rate):
     
     return model
 
+#========= check if the data format is channel first ================
+if K.image_data_format() != 'channels_first':
+    K.set_image_data_format('channels_first')
+    assert(K.image_data_format() == 'channels_first')
 
 #========= Load settings from Config file
 config = configparser.RawConfigParser()
@@ -112,7 +129,7 @@ patches_imgs_train, patches_masks_train = get_data_training(
 
 
 #========= Save and visualize a sample of what you're feeding to the neural network ==========
-N_sample = min(patches_imgs_train.shape[0],40)
+N_sample = 40
 visualize(group_images(patches_imgs_train[0:N_sample,:,:,:],5),'./Result/'+name_experiment+'/'+"sample_input_imgs")#.show()
 inside_mask,boundary_mask = parse_mask(patches_masks_train[0:N_sample,:,:,:])
 visualize(group_images(inside_mask,5),'./Result/'+name_experiment+'/'+"inside_mask")#.show()
