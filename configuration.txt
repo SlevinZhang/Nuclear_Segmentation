@@ -7,7 +7,7 @@ test_groundTruth = sameorgan_masks_test.hdf5
 
 
 [experiment name]
-name = train_original_images
+name = train_normalized_images
 
 
 [data attributes]
@@ -18,7 +18,7 @@ patch_width = 51
 
 [training settings]
 #number of total patches:
-N_subimgs = 144000
+N_subimgs = 108000
 #Number of training epochs
 N_epochs = 100
 batch_size = 100

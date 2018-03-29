@@ -58,9 +58,9 @@ def generate_ternary_masks(inside_mask, boundary_mask):
     for row in range(height):
         for col in range(width):
             if bound_arr[row,col] == True:
-                mask[row,col] = 2
+                mask[row,col] = 128
             elif inside_arr[row,col] == True:
-                mask[row,col] = 1
+                mask[row,col] = 255
             else:
                 mask[row,col] = 0
     return mask
@@ -88,14 +88,16 @@ def get_datasets(imgs_dir,mask_dir,Nimgs):
         mask = generate_ternary_masks(inside_mask,boundary_mask)
         masks[index] = mask
 
-    assert(np.max(masks) == 2 and np.min(masks) == 0)
+    assert(np.max(masks) == 255 and np.min(masks) == 0)
 
     #reshaping for my standard tensors
-    imgs = np.transpose(imgs,(0,3,1,2))
+#    imgs = np.transpose(imgs,(0,3,1,2))
     
-    masks = np.reshape(masks,(Nimgs,1,height,width))
-    assert(imgs.shape == (Nimgs,channels,height,width))
-    assert(masks.shape == (Nimgs,1,height,width))
+    
+    
+    masks = np.reshape(masks,(Nimgs,height,width,1))
+    assert(imgs.shape == (Nimgs,height,width,channels))
+    assert(masks.shape == (Nimgs,height,width,1))
 
     
     return imgs,masks
@@ -162,30 +164,37 @@ def get_normalized_datasets(imgs_dir, mask_dir):
                 iter_tot += 1
                 k += 1
         print(counter)
-    img_patches = np.transpose(img_patches,(0,3,1,2))
-    assert(img_patches.shape == (Nimgs,channels,patch_h,patch_w))
+#    img_patches = np.transpose(img_patches,(0,3,1,2))
+    assert(img_patches.shape == (Nimgs,patch_h,patch_w,channels))
     assert(mask_patches.shape == (Nimgs,3))
     return img_patches, mask_patches
     
 if __name__ == '__main__':
-    #------------Path of the images --------------------------------------------------------------
-    train_images = './normalized_dataset/images/'
-    mask_path = './normalized_dataset/masks/'
-#    test_images = './dataset/test_images/'
-    #---------------------------------------------------------------------------------------------
+
     dataset_root = "./hdf_dataset/"
     
     if not os.path.exists(dataset_root):
         os.makedirs(dataset_root)
-
-    #getting the training datasets
-    imgs_train, masks_train = get_normalized_datasets(train_images,mask_path)
-#    print "saving train datasets"
-    write_hdf5(imgs_train, dataset_root + "normalized_dataset_patches_imgs_train.hdf5")
-    write_hdf5(masks_train, dataset_root + "normalized_dataset_patches_masks_train.hdf5")
+#===============================Get Original dataset ==============================================
+    train_images = './dataset/train_images/'
+    mask_path = './dataset/intBinMask/'
+    
+    #Get training dataset
+    imgs_train, masks_train = get_datasets(train_images, mask_path,24)
+    write_hdf5(imgs_train,dataset_root + 'dataset_imgs_train.hdf5')
+    write_hdf5(masks_train,dataset_root + 'dataset_masks_train.hdf5')
 
 #    #getting the same organ testing datasets
 #    imgs_test, masks_test = get_datasets(test_images,mask_path,6)
 ##    print "saving test datasets"
 #    write_hdf5(imgs_test,dataset_root + "sameorgan_imgs_test.hdf5")
 #    write_hdf5(masks_test, dataset_root + "sameorgan_masks_test.hdf5")
+    
+    
+#=======================Get the normalized dataset from 9 images==============================
+#    train_images = './normalized_dataset/images/'
+#    mask_path = './normalized_dataset/masks/'
+#    
+#    imgs_train, masks_train = get_normalized_datasets(train_images,mask_path)
+#    write_hdf5(imgs_train, dataset_root + "normalized_dataset_patches_imgs_train.hdf5")
+#    write_hdf5(masks_train, dataset_root + "normalized_dataset_patches_masks_train.hdf5")

@@ -37,9 +37,10 @@ def visualize(data,filename):
 def group_images(data,per_row):
     assert data.shape[0]% per_row == 0
     
-    assert (data.shape[1]==1 or data.shape[1]==3)
-    data = np.transpose(data,(0,2,3,1))  #corect format for imshow
+    assert (data.shape[3]==1 or data.shape[3]==3)
+    
     all_stripe = []
+    
     for i in range(int(data.shape[0]/per_row)):
         stripe = data[i*per_row]
         for k in range(i*per_row+1, i*per_row+per_row):
@@ -69,16 +70,16 @@ def parse_mask(masks):
 
 def masks_nucleiNet(masks):
     assert (len(masks.shape)==4)  #4D arrays
-    assert (masks.shape[1]==1 )  #check the channel is 1
-    im_h = masks.shape[2]
-    im_w = masks.shape[3]
+    assert (masks.shape[3]==1 )  #check the channel is 1
+    im_h = masks.shape[1]
+    im_w = masks.shape[2]
     new_masks = np.empty((masks.shape[0],3))
     for i in range(masks.shape[0]):
-            if  masks[i,0,int(im_h/2),int(im_w/2)] == 0:
+            if  masks[i,int(im_h/2),int(im_w/2),0] == 0:
                 new_masks[i,0]=1
                 new_masks[i,1]=0
                 new_masks[i,2]=0
-            elif masks[i,0,int(im_h/2),int(im_w/2)] == 1:
+            elif masks[i,int(im_h/2),int(im_w/2),0] == 128:
                 new_masks[i,0]=0
                 new_masks[i,1]=1
                 new_masks[i,2]=0
@@ -88,21 +89,8 @@ def masks_nucleiNet(masks):
                 new_masks[i,1]=0
                 new_masks[i,2]=1
     return new_masks
-#another way to generate masks
-def category_masks(masks):
-    assert (len(masks.shape)==4)  #4D arrays
-    assert (masks.shape[1]==1 )  #check the channel is 1
-    im_h = masks.shape[2]
-    im_w = masks.shape[3]
-    new_masks = np.empty((masks.shape[0]))
-    for i in range(masks.shape[0]):
-        if  masks[i,0,int(im_h/2),int(im_w/2)] == 0:
-            new_masks[i]=0
-        elif masks[i,0,int(im_h/2),int(im_w/2)] == 1:
-            new_masks[i]=1
-        else:
-            new_masks[i]=2
-    return new_masks
+
+
 
 #determine the distribution of class 
 def class_distribution_train(ground_truth):

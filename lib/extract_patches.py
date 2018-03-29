@@ -59,16 +59,16 @@ def extract_random(full_imgs,full_masks, patch_h,patch_w, N_patches):
        
     #check the data consistancy
     assert (len(full_imgs.shape)==4 and len(full_masks.shape)==4)  #4D arrays
-    assert (full_imgs.shape[1]==1 or full_imgs.shape[1]==3)  #check the channel is 1 or 3
-    assert (full_masks.shape[1]==1)   #masks only black and white
-    assert (full_imgs.shape[2] == full_masks.shape[2] and full_imgs.shape[3] == full_masks.shape[3])
+    assert (full_imgs.shape[3]==1 or full_imgs.shape[3]==3)  #check the channel is 1 or 3
+    assert (full_masks.shape[3]==1)   #masks only black and white
+    assert (full_imgs.shape[1] == full_masks.shape[1] and full_imgs.shape[2] == full_masks.shape[2])
     
     #channel * height * width
-    patches = np.empty((N_patches,full_imgs.shape[1],patch_h,patch_w))
-    patches_masks = np.empty((N_patches,full_masks.shape[1],patch_h,patch_w))
+    patches = np.empty((N_patches,patch_h,patch_w,full_imgs.shape[3]))
+    patches_masks = np.empty((N_patches,patch_h,patch_w,full_masks.shape[3]))
     
-    img_h = full_imgs.shape[2]  #height of the full image
-    img_w = full_imgs.shape[3] #width of the full image
+    img_h = full_imgs.shape[1]  #height of the full image
+    img_w = full_imgs.shape[2] #width of the full image
     
     patch_per_img = int(N_patches/full_imgs.shape[0])
     
@@ -85,15 +85,17 @@ def extract_random(full_imgs,full_masks, patch_h,patch_w, N_patches):
             
             y_center = random.randint(0+int(patch_h/2),img_h - int(patch_h/2) - 1)
 
-            if counter[full_masks[i,0,y_center,x_center]] < patch_per_class:
+            center_label = int(full_masks[i,y_center,x_center,0] / 127)
+            
+            if counter[center_label] < patch_per_class:
 #                print("image:{}, {} class has: {}".format(i,full_masks[i,0,y_center,x_center],counter[full_masks[i,0,y_center,x_center]]))
-                patch_img = full_imgs[i,:,y_center - int(patch_h/2):y_center + int(patch_h/2)+1,x_center - int(patch_w/2):x_center + int(patch_w/2) + 1]
-                patch_mask = full_masks[i,:,y_center - int(patch_h/2):y_center + int(patch_h/2)+1,x_center - int(patch_w/2):x_center + int(patch_w/2)+1]
+                patch_img = full_imgs[i,y_center - int(patch_h/2):y_center + int(patch_h/2)+1,x_center - int(patch_w/2):x_center + int(patch_w/2) + 1,:]
+                patch_mask = full_masks[i,y_center - int(patch_h/2):y_center + int(patch_h/2)+1,x_center - int(patch_w/2):x_center + int(patch_w/2)+1,:]
                 
                 patches[iter_tot] = patch_img
                 patches_masks[iter_tot] = patch_mask
                 
-                counter[full_masks[i,0,y_center,x_center]] += 1
+                counter[center_label] += 1
                 iter_tot += 1
                 k += 1
     
