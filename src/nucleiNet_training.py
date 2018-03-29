@@ -25,7 +25,7 @@ from keras import optimizers
 from keras.models import Model
 from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, core, Dropout, Dense, Flatten
 from keras.optimizers import Adam
-from keras.callbacks import ModelCheckpoint, LearningRateScheduler
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator
 from keras.optimizers import SGD
@@ -127,7 +127,7 @@ N_subimgs = int(config.get('training settings', 'N_subimgs'))
 
 
 #============ Load the data and divided in patches
-#mask is a 3d array
+
 patches_imgs_train, patches_masks_train = get_data_training(
     hdf5_train_imgs = path_data + config.get('data paths', 'train_imgs_original'),
     hdf5_train_groundTruth = path_data + config.get('data paths', 'train_groundTruth'),  #masks
@@ -135,6 +135,7 @@ patches_imgs_train, patches_masks_train = get_data_training(
     patch_width = int(config.get('data attributes', 'patch_width')),
     N_subimgs = N_subimgs
 )
+
 
 #===============================Load in normaized data======================================
 #patches_imgs_train = load_hdf5('./hdf_dataset/normalized_dataset_patches_imgs_train.hdf5')
@@ -180,16 +181,7 @@ if sys.platform=='win32':
 else:
     os.system('mkdir -p ' + './weights/' + name_experiment + '/')
     
-checkpointer = ModelCheckpoint(filepath='./weights/' + name_experiment + '/' +name_experiment +'_best_weights.h5', verbose=1, monitor='val_loss', mode='auto', save_best_only=True) #save at each epoch if the validation decreased
 
-# def step_decay(epoch):
-#     lrate = 0.01 #the initial learning rate (by default in keras)
-#     if epoch==100:
-#         return 0.005
-#     else:
-#         return lrate
-#
-# lrate_drop = LearningRateScheduler(step_decay)
 
 #==============Calculate class distribution in patches===========================
 patches_masks_train = masks_nucleiNet(patches_masks_train)
@@ -212,25 +204,24 @@ print("Done with parse masks")
 #                              steps_per_epoch=N_subimgs/batch_size,
 #                              epochs = N_epochs,verbose=2) 
 
+#only save the best model performance on validation set
+checkpointer = ModelCheckpoint(filepath='./weights/' + name_experiment + '/' +name_experiment +'_best_weights.h5', verbose=1, monitor='val_loss', mode='auto', save_best_only=True) #save at each epoch if the validation decreased
+#early stop criteria, if the val_acc doesn't change after 10 epoches
+earlyStopping = EarlyStopping(monitor='val_acc',patience=10)
 
-model.fit(patches_imgs_train, patches_masks_train, epochs=N_epochs, 
+
+History = model.fit(patches_imgs_train, patches_masks_train, epochs=N_epochs, 
           batch_size=batch_size, verbose=1, shuffle=True, validation_split=0.1, 
-          callbacks=[checkpointer])
-#Todo List
-#set up the stop criteria, monitor the AUC to stop the training
-preds = model.predict(patches_imgs_train[:3000])
-import pdb ; pdb.set_trace()
+          callbacks=[checkpointer,earlyStopping])
+
 
 #========== Save and test the last model ===================
 model.save_weights('./weights/' + name_experiment + '/' + name_experiment + '_last_weights.h5', overwrite=True)
 
 
+print(History.history)
 
 
-#dev the model
-# score = model.evaluate(patches_imgs_dev, masks_Unet(patches_masks_dev), verbose=0)
-# print('Test score:', score[0])
-# print('Test accuracy:', score[1])
 
 
 
