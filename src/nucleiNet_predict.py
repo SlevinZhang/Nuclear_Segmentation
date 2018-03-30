@@ -108,7 +108,7 @@ predictions = model.predict(patches_imgs_test, batch_size=32, verbose=2)
 print("predicted images size : {}".format(predictions.shape))
 #
 ##===== Convert the prediction arrays in corresponding images
-pred_image = pred_to_imgs(predictions, full_img_height, full_img_width)
+pred_image = pred_to_imgs(predictions, 400-patch_height+1, 400-patch_width+1)
 #
 #
 #
@@ -122,7 +122,7 @@ pred_image = pred_to_imgs(predictions, full_img_height, full_img_width)
 #visualize(boundary_map, './Result/' + name_experiment + '/' + 'predict_boundary_map.jpeg')
 #visualize(inside_map, './Result/' + name_experiment + '/' + 'predict_inside_map.jpeg')
 #
-visualize(test_img[:400,:400,:],'./Result/'+name_experiment + '/sample_pred_img.jpeg')
+visualize(test_img[:400-patch_height+1,:400-patch_width+1,:],'./Result/'+name_experiment + '/sample_pred_img.jpeg')
 visualize(test_mask[:400-patch_height+1,:400-patch_width+1,:],'./Result/'+name_experiment+'/sample_pred_mask.jpeg')
 visualize(pred_image,'./Result/' + name_experiment + '/predict_prob_map.jpeg')
 import pdb; pdb.set_trace()

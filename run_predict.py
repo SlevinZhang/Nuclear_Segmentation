@@ -34,5 +34,5 @@ if not os.path.exists('./weights/' + name_experiment):
     exit()
 
 # finally run the prediction
-print("\n2. Run the prediction on GPU (no nohup)")
+print("\n Run the prediction on GPU")
 os.system('python ./src/nucleiNet_predict.py')

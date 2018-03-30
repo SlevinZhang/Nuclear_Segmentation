@@ -148,7 +148,7 @@ def class_distribution_train(ground_truth):
         
         
 def pred_to_imgs(pred, full_image_height, full_image_width):
-    assert (len(pred.shape)==3)  #3D array: (Npatches,height*width,2)
+    assert (len(pred.shape)==2)  #3D array: (Npatches,height*width,2)
 
     pred_image = np.empty((full_image_height, full_image_width,1))
 
