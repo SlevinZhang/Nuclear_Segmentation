@@ -31,13 +31,13 @@ def get_data_training(hdf5_train_imgs, hdf5_train_groundTruth, patch_height, pat
     return patches_imgs_train,patches_masks_train
 
 def paint_border(predict_imgs, patch_height, patch_width):
-    img_h, img_w, channel = predict_imgs.shape
+    [img_h, img_w, channel] = predict_imgs.shape
     new_img_h = img_h + patch_height - 1
     new_img_w = img_w + patch_width - 1
     
     new_data = np.zeros((new_img_h, new_img_w, channel))
     
-    new_data[int(patch_height/2):new_img_h-int(patch_height/2)+1,int(patch_width/2):img_w-int(patch_width/2)+1] = predict_imgs[:,:,:]
+    new_data[int(patch_height/2):new_img_h-int(patch_height/2),int(patch_width/2):new_img_w-int(patch_width/2),:] = predict_imgs[:,:,:]
     
     return new_data
 #for testing process
@@ -46,28 +46,31 @@ def get_data_predict(predict_imgs, predict_groundTruth, patch_height, patch_widt
     assert(len(predict_imgs.shape) == 3)
     assert(predict_imgs.shape[2] == 3)
     assert(len(predict_groundTruth.shape) == 2)
-    
+   
+    [original_h, original_w, channel] = predict_imgs.shape 
     #extend images so that all pixels from original image could be predicted
     predict_imgs = paint_border(predict_imgs, patch_height,patch_width)
     
     
     
-    patches_imgs_predict = extract_ordered(predict_imgs, patch_height, patch_width, original_h, original_w)
-    patches_masks_predict = np.reshape(predict_groundTruth,[-1,1])
+    patches_imgs_predict = extract_ordered(predict_imgs[:400,:400,:], patch_height, patch_width)
+    patches_masks_predict = np.reshape(predict_groundTruth[:400-patch_height+1,:400-patch_width+1],[-1,1])
     
     return patches_imgs_predict, patches_masks_predict
     
     
 
 #for prepare dataset
-def extract_ordered(full_imgs, patch_h, patch_w,original_h, original_w):
+def extract_ordered(full_imgs, patch_h, patch_w):
     '''
     extract patches for image, the mask along with patches
     '''
-    patches = np.empty((original_h * original_w, original_h, original_w))
+    num_rows = full_imgs.shape[0] - patch_h + 1
+    num_cols = full_imgs.shape[1] - patch_w + 1
+    patches = np.empty((num_rows * num_cols, patch_h, patch_w,full_imgs.shape[2]))
     iter_tot = 0
-    for row in range(original_h):
-        for col in range(original_w):
+    for row in range(num_rows):
+        for col in range(num_cols):
             patches[iter_tot] = full_imgs[row:row + patch_h,col:col + patch_w,:]
             iter_tot += 1
             

@@ -9,11 +9,11 @@ Created on Wed Mar 14 11:49:30 2018
 #used to test the trained model
 
 import os
-import ConfigParser
+import configparser
 
 
 #config file to read from
-config = ConfigParser.RawConfigParser()
+config = configparser.RawConfigParser()
 config.readfp(open(r'./configuration.txt'))
 #===========================================
 #name of the experiment!!
@@ -35,4 +35,4 @@ if not os.path.exists('./weights/' + name_experiment):
 
 # finally run the prediction
 print("\n2. Run the prediction on GPU (no nohup)")
-os.system('python ./src/retinaNN_predict.py')
+os.system('python ./src/nucleiNet_predict.py')

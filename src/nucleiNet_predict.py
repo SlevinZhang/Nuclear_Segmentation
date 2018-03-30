@@ -9,7 +9,7 @@ Created on Wed Mar 14 11:48:18 2018
 
 #Python
 import numpy as np
-import ConfigParser
+import configparser
 from matplotlib import pyplot as plt
 #Keras
 from keras.models import model_from_json
@@ -26,21 +26,16 @@ sys.path.insert(0, './lib/')
 # help_functions.py
 from help_functions import *
 # extract_patches.py
-from extract_patches import recompone
-from extract_patches import recompone_overlap
 from extract_patches import paint_border
-from extract_patches import kill_border
-from extract_patches import pred_only_FOV
-from extract_patches import get_data_testing
-from extract_patches import get_data_testing_overlap
+from extract_patches import get_data_predict
+
 # pre_processing.py
-from pre_processing import my_PreProc
 from PIL import Image
 import os
 
 
 #========= CONFIG FILE TO READ FROM =======
-config = ConfigParser.RawConfigParser()
+config = configparser.RawConfigParser()
 config.read('configuration.txt')
 #===========================================
 #run the training on invariant or local
@@ -81,7 +76,7 @@ if test_mode == 'single':
     test_img = np.asarray(Image.open(test_img_filename))
     test_mask = generate_ternary_masks(inside_filename,boundary_filename)
     
-    full_img_height,full_img_width = test_img.shape
+    [full_img_height,full_img_width,channel] = test_img.shape
     
     patches_imgs_test, patches_masks_test = get_data_predict(
         predict_imgs = test_img,
@@ -101,20 +96,19 @@ else:
     )
 
 
+#================ Run the prediction of the patches ==================================
+best_last = config.get('testing settings', 'best_last')
+#Load the saved model
+model = model_from_json(open('./model/' + name_experiment +'_architecture.json').read())
+model.load_weights('./weights/' + name_experiment + '/' + name_experiment + '_'+best_last+'_weights.h5')
 
-##================ Run the prediction of the patches ==================================
-#best_last = config.get('testing settings', 'best_last')
-##Load the saved model
-#model = model_from_json(open('./model/' + name_experiment +'_architecture.json').read())
-#model.load_weights('./weights/' + name_experiment + '/' + name_experiment + '_'+best_last+'_weights.h5')
+#Calculate the predictions
+predictions = model.predict(patches_imgs_test, batch_size=32, verbose=2)
 #
-##Calculate the predictions
-#predictions = model.predict(patches_imgs_test, batch_size=32, verbose=2)
-#
-#print("predicted images size : {}".format(predictions.shape))
+print("predicted images size : {}".format(predictions.shape))
 #
 ##===== Convert the prediction arrays in corresponding images
-#boundary_map, inside_map, background_map = pred_to_imgs(predictions, full_img_height, full_img_width)
+boundary_map, inside_map, background_map = pred_to_imgs(predictions, full_img_height, full_img_width)
 #
 #
 #
@@ -128,6 +122,7 @@ else:
 #visualize(boundary_map, './Result/' + name_experiment + '/' + 'predict_boundary_map.jpeg')
 #visualize(inside_map, './Result/' + name_experiment + '/' + 'predict_inside_map.jpeg')
 #
+import pdb; pdb.set_trace()
 #
 ##====== Evaluate the results
 #print("\n\n========  Evaluate the results =======================")
