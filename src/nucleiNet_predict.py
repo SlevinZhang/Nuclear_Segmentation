@@ -135,10 +135,10 @@ visualize(pred_image,'./Result/' + name_experiment + '/predict_prob_map.jpeg')
 
 #====== Evaluate the results
 print("\n\n========  Evaluate the results =======================")
-y_scores = predictions
+y_scores = np.reshape(np.argmax(predictions,axis=1),[-1,1])
 y_true = patches_masks_test
-
-print("Accuracy: {}".format(sum(np.equal(np.argmax(y_scores,axis=1),y_true))/len(y_true)))
+acc = sum(np.equal(y_scores,y_true)) / len(y_true)
+print("Accuracy: {}".format())
 #
 ##Area under the ROC curve
 #fpr, tpr, thresholds = roc_curve((y_true), y_scores)
