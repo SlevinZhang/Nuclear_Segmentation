@@ -76,11 +76,17 @@ if test_mode == 'single':
     test_img = np.asarray(Image.open(test_img_filename))
     test_mask = generate_ternary_masks(inside_filename,boundary_filename)
     
+    test_sample_img = test_img[:300,:300,:]
+    test_sample_mask = test_mask[:300,:300,:]
+    
     [full_img_height,full_img_width,channel] = test_img.shape
     
+    [sample_img_height,sample_img_width, sam_channel] = test_sample_img.shape
+    
+    #masks is already 0,1,2
     patches_imgs_test, patches_masks_test = get_data_predict(
-        predict_imgs = test_img,
-        predict_groundTruth = test_mask,
+        predict_imgs = test_sample_img,
+        predict_groundTruth = test_sample_mask,
         patch_height = patch_height,
         patch_width = patch_width,
         N_imgs = Imgs_to_test
@@ -108,7 +114,7 @@ predictions = model.predict(patches_imgs_test, batch_size=32, verbose=2)
 print("predicted images size : {}".format(predictions.shape))
 #
 ##===== Convert the prediction arrays in corresponding images
-pred_image = pred_to_imgs(predictions, 400-patch_height+1, 400-patch_width+1)
+pred_image = pred_to_imgs(predictions, sample_img_height, sample_img_width)
 #
 #
 #
@@ -122,15 +128,17 @@ pred_image = pred_to_imgs(predictions, 400-patch_height+1, 400-patch_width+1)
 #visualize(boundary_map, './Result/' + name_experiment + '/' + 'predict_boundary_map.jpeg')
 #visualize(inside_map, './Result/' + name_experiment + '/' + 'predict_inside_map.jpeg')
 #
-visualize(test_img[:400-patch_height+1,:400-patch_width+1,:],'./Result/'+name_experiment + '/sample_pred_img.jpeg')
-visualize(test_mask[:400-patch_height+1,:400-patch_width+1,:],'./Result/'+name_experiment+'/sample_pred_mask.jpeg')
+visualize(test_sample_img,'./Result/'+name_experiment + '/sample_pred_img.jpeg')
+visualize(test_sample_mask,'./Result/'+name_experiment+'/sample_pred_mask.jpeg')
 visualize(pred_image,'./Result/' + name_experiment + '/predict_prob_map.jpeg')
-import pdb; pdb.set_trace()
-#
-##====== Evaluate the results
-#print("\n\n========  Evaluate the results =======================")
-#y_scores = predictions
-#y_true = test_mask
+
+
+#====== Evaluate the results
+print("\n\n========  Evaluate the results =======================")
+y_scores = predictions
+y_true = patches_masks_test
+
+print("Accuracy: {}".format(sum(np.equal(np.argmax(y_scores,axis=1),y_true))/len(y_true)))
 #
 ##Area under the ROC curve
 #fpr, tpr, thresholds = roc_curve((y_true), y_scores)
@@ -145,6 +153,7 @@ import pdb; pdb.set_trace()
 #plt.ylabel("TPR (True Positive Rate) or sensitivity")
 #plt.legend(loc="lower right")
 #plt.savefig('./Result/' + name_experiment + '/' + "ROC.png")
+import pdb; pdb.set_trace()
 
 ##Precision-recall curve
 #precision, recall, thresholds = precision_recall_curve(y_true, y_scores)

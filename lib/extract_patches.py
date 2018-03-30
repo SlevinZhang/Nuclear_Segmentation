@@ -40,6 +40,8 @@ def paint_border(predict_imgs, patch_height, patch_width):
     new_data[int(patch_height/2):new_img_h-int(patch_height/2),int(patch_width/2):new_img_w-int(patch_width/2),:] = predict_imgs[:,:,:]
     
     return new_data
+
+
 #for testing process
 def get_data_predict(predict_imgs, predict_groundTruth, patch_height, patch_width,
                      N_imgs):
@@ -51,11 +53,10 @@ def get_data_predict(predict_imgs, predict_groundTruth, patch_height, patch_widt
     #extend images so that all pixels from original image could be predicted
     predict_imgs = paint_border(predict_imgs, patch_height,patch_width)
     
+    patches_imgs_predict = extract_ordered(predict_imgs, patch_height, patch_width)
     
+    sample_masks = (predict_groundTruth / 127).astype(int)
     
-    patches_imgs_predict = extract_ordered(predict_imgs[:400,:400,:], patch_height, patch_width)
-    
-    sample_masks = (predict_groundTruth[:400-patch_height+1,:400-patch_width+1,:] / 127).astype(int)
     patches_masks_predict = np.reshape(sample_masks,[-1,1])
     
     return patches_imgs_predict, patches_masks_predict
