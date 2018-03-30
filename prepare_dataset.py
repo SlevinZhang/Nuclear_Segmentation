@@ -48,7 +48,7 @@ def get_datasets(imgs_dir,mask_dir,Nimgs):
         nd-array of masks(ternary mask)
     '''
     imgs = np.empty((Nimgs,height,width,channels))
-    masks = np.empty((Nimgs,height,width))
+    masks = np.empty((Nimgs,height,width,1))
 
     image_filenames = glob.glob(imgs_dir + '*.jpeg')
     for index,filename in enumerate(image_filenames):

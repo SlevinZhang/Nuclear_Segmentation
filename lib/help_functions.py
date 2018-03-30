@@ -36,15 +36,15 @@ def generate_ternary_masks(inside_mask, boundary_mask):
 #    print("inside, min:{}, max:{}".format(np.min(inside_arr),np.max(inside_arr)))
     height,width = np.shape(bound_arr)
     
-    mask = np.empty((height,width))
+    mask = np.empty((height,width,1))
     for row in range(height):
         for col in range(width):
             if bound_arr[row,col] == True:
-                mask[row,col] = 128
+                mask[row,col,0] = 128
             elif inside_arr[row,col] == True:
-                mask[row,col] = 255
+                mask[row,col,0] = 255
             else:
-                mask[row,col] = 0
+                mask[row,col,0] = 0
     return mask
 
 #visualize image (as PIL image)
@@ -147,23 +147,13 @@ def class_distribution_train(ground_truth):
 
         
         
-def pred_to_imgs(pred, patch_height, patch_width, mode="original"):
+def pred_to_imgs(pred, full_image_height, full_image_width):
     assert (len(pred.shape)==3)  #3D array: (Npatches,height*width,2)
-    assert (pred.shape[2]==2 )  #check the classes are 2
-    pred_images = np.empty((pred.shape[0],pred.shape[1]))  #(Npatches,height*width)
-    if mode=="original":
-        for i in range(pred.shape[0]):
-            for pix in range(pred.shape[1]):
-                pred_images[i,pix]=pred[i,pix,1]
-    elif mode=="threshold":
-        for i in range(pred.shape[0]):
-            for pix in range(pred.shape[1]):
-                if pred[i,pix,1]>=0.5:
-                    pred_images[i,pix]=1
-                else:
-                    pred_images[i,pix]=0
-    else:
-        print("mode " +str(mode) +" not recognized, it can be 'original' or 'threshold'")
-        exit()
-    pred_images = np.reshape(pred_images,(pred_images.shape[0],1, patch_height, patch_width))
-    return pred_images
+
+    pred_image = np.empty((full_image_height, full_image_width,1))
+
+    for row in range(full_image_height):
+        for col in range(full_image_width):
+            pred_image[row,col,0] = np.argmax(pred[row*full_image_width + col]) * 127 + 1
+
+    return pred_image

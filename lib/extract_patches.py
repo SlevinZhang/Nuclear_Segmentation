@@ -54,7 +54,9 @@ def get_data_predict(predict_imgs, predict_groundTruth, patch_height, patch_widt
     
     
     patches_imgs_predict = extract_ordered(predict_imgs[:400,:400,:], patch_height, patch_width)
-    patches_masks_predict = np.reshape(predict_groundTruth[:400-patch_height+1,:400-patch_width+1],[-1,1])
+    
+    sample_masks = int(predict_groundTruth[:400-patch_height+1,:400-patch_width+1] / 127)
+    patches_masks_predict = np.reshape(sample_masks,[-1,1])
     
     return patches_imgs_predict, patches_masks_predict
     
