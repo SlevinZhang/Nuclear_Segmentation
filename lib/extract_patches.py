@@ -30,17 +30,50 @@ def get_data_training(hdf5_train_imgs, hdf5_train_groundTruth, patch_height, pat
     
     return patches_imgs_train,patches_masks_train
 
-
+def paint_border(predict_imgs, patch_height, patch_width):
+    img_h, img_w, channel = predict_imgs.shape
+    new_img_h = img_h + patch_height - 1
+    new_img_w = img_w + patch_width - 1
+    
+    new_data = np.zeros((new_img_h, new_img_w, channel))
+    
+    new_data[int(patch_height/2):new_img_h-int(patch_height/2)+1,int(patch_width/2):img_w-int(patch_width/2)+1] = predict_imgs[:,:,:]
+    
+    return new_data
 #for testing process
-def get_data_predict(predict_imgs, predict_groundTruth, patch_height,patch_width):
-    pass
+def get_data_predict(predict_imgs, predict_groundTruth, patch_height, patch_width,
+                     N_imgs):
+    assert(len(predict_imgs.shape) == 3)
+    assert(predict_imgs.shape[2] == 3)
+    assert(len(predict_groundTruth.shape) == 2)
+    
+    #extend images so that all pixels from original image could be predicted
+    predict_imgs = paint_border(predict_imgs, patch_height,patch_width)
+    
+    
+    
+    patches_imgs_predict = extract_ordered(predict_imgs, patch_height, patch_width, original_h, original_w)
+    patches_masks_predict = np.reshape(predict_groundTruth,[-1,1])
+    
+    return patches_imgs_predict, patches_masks_predict
+    
+    
 
 #for prepare dataset
-def extract_ordered(full_imgs, patch_h, patch_w):
+def extract_ordered(full_imgs, patch_h, patch_w,original_h, original_w):
     '''
     extract patches for image, the mask along with patches
     '''
-    pass
+    patches = np.empty((original_h * original_w, original_h, original_w))
+    iter_tot = 0
+    for row in range(original_h):
+        for col in range(original_w):
+            patches[iter_tot] = full_imgs[row:row + patch_h,col:col + patch_w,:]
+            iter_tot += 1
+            
+    return patches
+        
+    
 
 def preprocessing(imgs_original):
     '''

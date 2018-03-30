@@ -18,8 +18,34 @@ def write_hdf5(arr,outfile):
   with h5py.File(outfile,"w") as f:
     f.create_dataset("image", data=arr, dtype=arr.dtype)
     
-def pred_to_imgs():
-    pass
+#---------------------------------------------------
+def generate_ternary_masks(inside_mask, boundary_mask):
+    '''
+    :param mask_name: the filename of mask
+    :return:
+        a ndarray mask with same size
+        '0': represent background
+        '1': represent inside
+        '2': represent boundary
+    '''
+    boundary = Image.open(boundary_mask)
+    bound_arr = np.asarray(boundary)
+#    print("boundary, min:{}, max:{}".format(np.min(bound_arr),np.max(bound_arr)))
+    inside = Image.open(inside_mask)
+    inside_arr = np.asarray(inside)
+#    print("inside, min:{}, max:{}".format(np.min(inside_arr),np.max(inside_arr)))
+    height,width = np.shape(bound_arr)
+    
+    mask = np.empty((height,width))
+    for row in range(height):
+        for col in range(width):
+            if bound_arr[row,col] == True:
+                mask[row,col] = 128
+            elif inside_arr[row,col] == True:
+                mask[row,col] = 255
+            else:
+                mask[row,col] = 0
+    return mask
 
 #visualize image (as PIL image)
 def visualize(data,filename):

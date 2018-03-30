@@ -37,33 +37,7 @@ def write_hdf5(arr,outfile):
 channels = 3
 height = 1000
 width = 1000
-#---------------------------------------------------
-def generate_ternary_masks(inside_mask, boundary_mask):
-    '''
-    :param mask_name: the filename of mask
-    :return:
-        a ndarray mask with same size
-        '0': represent background
-        '1': represent inside
-        '2': represent boundary
-    '''
-    boundary = Image.open(boundary_mask)
-    bound_arr = np.asarray(boundary)
-#    print("boundary, min:{}, max:{}".format(np.min(bound_arr),np.max(bound_arr)))
-    inside = Image.open(inside_mask)
-    inside_arr = np.asarray(inside)
-#    print("inside, min:{}, max:{}".format(np.min(inside_arr),np.max(inside_arr)))
-    
-    mask = np.empty((height,width))
-    for row in range(height):
-        for col in range(width):
-            if bound_arr[row,col] == True:
-                mask[row,col] = 128
-            elif inside_arr[row,col] == True:
-                mask[row,col] = 255
-            else:
-                mask[row,col] = 0
-    return mask
+
 def get_datasets(imgs_dir,mask_dir,Nimgs):
     '''
     input:
@@ -183,12 +157,6 @@ if __name__ == '__main__':
     imgs_train, masks_train = get_datasets(train_images, mask_path,24)
     write_hdf5(imgs_train,dataset_root + 'dataset_imgs_train.hdf5')
     write_hdf5(masks_train,dataset_root + 'dataset_masks_train.hdf5')
-
-#    #getting the same organ testing datasets
-#    imgs_test, masks_test = get_datasets(test_images,mask_path,6)
-##    print "saving test datasets"
-#    write_hdf5(imgs_test,dataset_root + "sameorgan_imgs_test.hdf5")
-#    write_hdf5(masks_test, dataset_root + "sameorgan_masks_test.hdf5")
     
     
 #=======================Get the normalized dataset from 9 images==============================
