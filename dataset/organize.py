@@ -23,6 +23,9 @@ patches_root = './train_patches/'
 
 if not os.path.exists(patches_root):
     os.mkdir(patches_root)
+    os.mkdir(patches_root +'0/')
+    os.mkdir(patches_root + '1/')
+    os.mkdir(patches_root + '2/')
 
 train_imgs = glob.glob(train_dataset + '*.jpg')
 index = 0
