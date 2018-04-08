@@ -212,7 +212,7 @@ earlyStopping = EarlyStopping(monitor='val_loss',patience=10)
 #History = model.fit(patches_imgs_train, patches_masks_train, epochs=N_epochs, 
 #          batch_size=batch_size, verbose=1, shuffle=True, validation_split=0.1, 
 #          callbacks=[checkpointer,earlyStopping])
-
+History= model.fit_generator(datagen, steps_per_epoch = stepPerE, epochs=N_epochs,callbacks=[checkpointer, earlyStopping])
 
 #========== Save and test the last model ===================
 model.save_weights('./weights/' + name_experiment + '/' + name_experiment + '_last_weights.h5', overwrite=True)

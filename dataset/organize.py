@@ -10,52 +10,77 @@ import os
 import shutil
 from PIL import Image
 import numpy as np
+import random
 
 train_dataset = './train/'
+dev_dataset = './dev/'
+
 train_mask_dataset = './train_mask/'
+
 test_same_organ = './test_same_organ/'
 test_same_organ_mask = './test_same_organ_mask/'
 test_diff_organ = './test_diff_organ/'
 test_diff_organ_mask = './test_diff_organ_mask/'
 mask_root = './intBinMask/'
 patches_root = './train_patches/'
+
+#===================================separate validation dataset=================================================
+if not os.path.exists(dev_dataset):
+    os.mkdir(dev_dataset)
+    os.mkdir(dev_dataset +'0/')
+    os.mkdir(dev_dataset + '1/')
+    os.mkdir(dev_dataset + '2/')
+    
+total_num = 480000
+val_num = total_num * 0.1
+
+folders = glob.glob(train_dataset + '*')
+for folder in folders:
+    images = glob.glob(folder + '*.jpg')
+    indexes = random.sample(range(len(images)),val_num/3)
+    for index in indexes:
+        new_image = dev_dataset + folder + '/' + os.path.basename(images[index])
+        os.rename(images[index],new_image)
+        
+
+
 #======================================================divide into pathces ===========================================
 
-if not os.path.exists(patches_root):
-    os.mkdir(patches_root)
-    os.mkdir(patches_root +'0/')
-    os.mkdir(patches_root + '1/')
-    os.mkdir(patches_root + '2/')
-
-train_imgs = glob.glob(train_dataset + '*.jpg')
-index = 0
-for filename in train_imgs:
-    counter = {0:0,1:0,2:0}
-    basename = os.path.basename(filename).split('.')[0]
-    boundary_mask = Image.open(train_mask_dataset + basename + '_mask_bound.bmp')
-    inside_mask = Image.open(train_mask_dataset + basename + '_mask_inside.bmp')
-    img = Image.open(filename)
-    img_arr = np.asarray(img)
-    bound_arr = np.asarray(boundary_mask)
-    inside_arr = np.asarray(inside_mask)
-    [height, width,chal] = np.shape(img_arr)
-    patch_width = 51
-    patch_height = 51
-    for row in range(0+int(patch_height/2),height-int(patch_height/2)-1):
-        for col in range(0+int(patch_width/2),width-int(patch_width/2)-1):
-            if bound_arr[row,col]:
-                patch_label = 2
-            elif inside_arr[row,col]:
-                patch_label = 1
-            else:
-                patch_label = 0
-            if counter[patch_label] < 10000:
-                patch_img = img_arr[row -int(patch_height/2):row + int(patch_height/2)+1,col - int(patch_height/2):col + int(patch_width/2) + 1,:]
-                patch = Image.fromarray(patch_img)
-                patch.save(patches_root + str(patch_label) + '/' + str(index) + '.jpg')
-                counter[patch_label] += 1
-                index += 1
-                print(counter)
+#if not os.path.exists(patches_root):
+#    os.mkdir(patches_root)
+#    os.mkdir(patches_root +'0/')
+#    os.mkdir(patches_root + '1/')
+#    os.mkdir(patches_root + '2/')
+#
+#train_imgs = glob.glob(train_dataset + '*.jpg')
+#index = 0
+#for filename in train_imgs:
+#    counter = {0:0,1:0,2:0}
+#    basename = os.path.basename(filename).split('.')[0]
+#    boundary_mask = Image.open(train_mask_dataset + basename + '_mask_bound.bmp')
+#    inside_mask = Image.open(train_mask_dataset + basename + '_mask_inside.bmp')
+#    img = Image.open(filename)
+#    img_arr = np.asarray(img)
+#    bound_arr = np.asarray(boundary_mask)
+#    inside_arr = np.asarray(inside_mask)
+#    [height, width,chal] = np.shape(img_arr)
+#    patch_width = 51
+#    patch_height = 51
+#    for row in range(0+int(patch_height/2),height-int(patch_height/2)-1):
+#        for col in range(0+int(patch_width/2),width-int(patch_width/2)-1):
+#            if bound_arr[row,col]:
+#                patch_label = 2
+#            elif inside_arr[row,col]:
+#                patch_label = 1
+#            else:
+#                patch_label = 0
+#            if counter[patch_label] < 10000:
+#                patch_img = img_arr[row -int(patch_height/2):row + int(patch_height/2)+1,col - int(patch_height/2):col + int(patch_width/2) + 1,:]
+#                patch = Image.fromarray(patch_img)
+#                patch.save(patches_root + str(patch_label) + '/' + str(index) + '.jpg')
+#                counter[patch_label] += 1
+#                index += 1
+#                print(counter)
 
 #========================================================training set statistics======================================
 #train_boundary_files = glob.glob(train_mask_dataset + '*_mask_bound.bmp')
