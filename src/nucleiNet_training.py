@@ -195,13 +195,30 @@ print("Done with parse masks")
 #        horizontal_flip = True,
 #        vertical_flip = True,
 #        data_format='channels_first')
-
-
+train_datagen = ImageDataGenerator(
+        horizontal_flip = True,
+        vertical_flip = True
+        )
+train_datagen.flow_from_directory(
+        './dataset/train_patches/',
+        target_size=(51,51),
+        class_mode = 'categorical',
+        batch_size = 128,
+        shuffle = True
+        )
+dev_datagen = ImageDataGenerator(
+        horizontal_flip = True,
+        vertical_flip = True
+        )
+dev_datagen.flow_from_directory(
+        './dataset/dev_patches/',
+        target_size = (51,51),
+        class_mode = 'categorical',
+        batch_size = 128,
+        shuffle = True
+        )
 #========= Training =====================================
 
-#model.fit_generator(datagen.flow(patches_imgs_train,patches_masks_train,batch_size=batch_size),
-#                              steps_per_epoch=N_subimgs/batch_size,
-#                              epochs = N_epochs,verbose=2) 
 
 #only save the best model performance on validation set
 checkpointer = ModelCheckpoint(filepath='./weights/' + name_experiment + '/' +name_experiment +'_best_weights.h5', verbose=1, monitor='val_loss', mode='auto', save_best_only=True) #save at each epoch if the validation decreased
@@ -212,7 +229,9 @@ earlyStopping = EarlyStopping(monitor='val_loss',patience=10)
 #History = model.fit(patches_imgs_train, patches_masks_train, epochs=N_epochs, 
 #          batch_size=batch_size, verbose=1, shuffle=True, validation_split=0.1, 
 #          callbacks=[checkpointer,earlyStopping])
-History= model.fit_generator(datagen, steps_per_epoch = stepPerE, epochs=N_epochs,callbacks=[checkpointer, earlyStopping])
+History= model.fit_generator(train_datagen, steps_per_epoch = 3375, epochs=N_epochs,
+                             validation_data = dev_datagen,validation_steps = 375,
+                             callbacks=[checkpointer, earlyStopping])
 
 #========== Save and test the last model ===================
 model.save_weights('./weights/' + name_experiment + '/' + name_experiment + '_last_weights.h5', overwrite=True)
