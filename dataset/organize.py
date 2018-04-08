@@ -34,12 +34,14 @@ if not os.path.exists(dev_dataset):
 total_num = 480000
 val_num = total_num * 0.1
 
-folders = glob.glob(train_dataset + '*')
+folders = glob.glob('./train_patches/' + '*')
+
 for folder in folders:
-    images = glob.glob(folder + '*.jpg')
-    indexes = random.sample(range(len(images)),val_num/3)
+    basefolder = os.path.basename(folder)
+    images = glob.glob(folder + '/*.jpg')
+    indexes = random.sample(range(len(images)),int(val_num/3))
     for index in indexes:
-        new_image = dev_dataset + folder + '/' + os.path.basename(images[index])
+        new_image = dev_dataset + basefolder + '/' + os.path.basename(images[index])
         os.rename(images[index],new_image)
         
 
