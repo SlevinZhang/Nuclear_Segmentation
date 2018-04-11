@@ -21,6 +21,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import jaccard_similarity_score
 from sklearn.metrics import f1_score
+from sklearn.metrics import accuracy_score
 import sys
 sys.path.insert(0, './lib/')
 # help_functions.py
@@ -32,7 +33,7 @@ from extract_patches import get_data_predict
 # pre_processing.py
 from PIL import Image
 import os
-
+import itertools
 
 #========= CONFIG FILE TO READ FROM =======
 config = configparser.RawConfigParser()
@@ -54,8 +55,8 @@ test_mode = 'single'
 
 if test_mode == 'single':
     
-    test_img_filename = './dataset/test_images/TCGA-HE-7128-01Z-00-DX1.jpeg'
-    boundary_filename = './dataset/intBinMask/' + os.path.basename(test_img_filename).split('.')[0] + '_mask_bound.bmp'
+    test_img_filename = './dataset/test_same_organ/TCGA-49-4488-01Z-00-DX1.jpg'
+    boundary_filename = './dataset/test_same_organ_mask/' + os.path.basename(test_img_filename).split('.')[0] + '_mask_bound.bmp'
     inside_filename = './dataset/intBinMask/' + os.path.basename(test_img_filename).split('.')[0] + '_mask_inside.bmp'
     Imgs_to_test = 1
     
@@ -130,30 +131,33 @@ pred_image = pred_to_imgs(predictions, sample_img_height, sample_img_width)
 #
 visualize(test_sample_img,'./Result/'+name_experiment + '/sample_pred_img.jpeg')
 visualize(test_sample_mask,'./Result/'+name_experiment+'/sample_pred_mask.jpeg')
-visualize(pred_image,'./Result/' + name_experiment + '/predict_prob_map.jpeg')
+visualize(pred_image[:,:,0],'./Result/' + name_experiment + '/predict_prob_inside_map.jpeg')
+visualize(pred_image[:,:,1],'./Result/' + name_experiment + '/predict_prob_bound_map.jpeg')
+
 
 
 #====== Evaluate the results
 print("\n\n========  Evaluate the results =======================")
 y_scores = np.reshape(np.argmax(predictions,axis=1),[-1,1])
 y_true = patches_masks_test
-acc = sum(np.equal(y_scores,y_true)) / len(y_true)
-print("Accuracy: {}".format())
+
+acc = accuracy_score(y_true,y_scores)
+print("Accuracy: {}".format(acc))
 #
 ##Area under the ROC curve
-#fpr, tpr, thresholds = roc_curve((y_true), y_scores)
-#AUC_ROC = roc_auc_score(y_true, y_scores)
-## test_integral = np.trapz(tpr,fpr) #trapz is numpy integration
-#print("\nArea under the ROC curve: " +str(AUC_ROC))
+fpr, tpr, thresholds = roc_curve((y_true), y_scores)
+AUC_ROC = roc_auc_score(y_true, y_scores)
+# test_integral = np.trapz(tpr,fpr) #trapz is numpy integration
+print("\nArea under the ROC curve: " +str(AUC_ROC))
 #
-#roc_curve =plt.figure()
-#plt.plot(fpr,tpr,'-',label='Area Under the Curve (AUC = %0.4f)' % AUC_ROC)
-#plt.title('ROC curve')
-#plt.xlabel("FPR (False Positive Rate) or 1 - specificity")
-#plt.ylabel("TPR (True Positive Rate) or sensitivity")
-#plt.legend(loc="lower right")
-#plt.savefig('./Result/' + name_experiment + '/' + "ROC.png")
-import pdb; pdb.set_trace()
+roc_curve =plt.figure()
+plt.plot(fpr,tpr,'-',label='Area Under the Curve (AUC = %0.4f)' % AUC_ROC)
+plt.title('ROC curve')
+plt.xlabel("FPR (False Positive Rate) or 1 - specificity")
+plt.ylabel("TPR (True Positive Rate) or sensitivity")
+plt.legend(loc="lower right")
+plt.savefig('./Result/' + name_experiment + '/' + "ROC.png")
+
 
 ##Precision-recall curve
 #precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
@@ -170,19 +174,35 @@ import pdb; pdb.set_trace()
 #plt.savefig(path_experiment+"Precision_recall.png")
 #
 ##Confusion matrix
-#threshold_confusion = 0.5
-#print("\nConfusion matrix:  Costum threshold (for positive) of " +str(threshold_confusion))
-#y_pred =(np.empty((y_scores.shape[0])))
-#for i in range(y_scores.shape[0]):
-#    if y_scores[i]>=threshold_confusion:
-#        y_pred[i]=1
-#    else:
-#        y_pred[i]=0
-#        
-#confusion = confusion_matrix(y_true, y_pred)
-#print(confusion)
-#
-#
+cm = confusion_matrix(y_true,y_scores)
+
+cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+plt.title('Confusion Matrix')
+plt.colorbar()
+tick_marks = np.arange(len(3))
+plt.xticks(tick_marks, [0,1,2], rotation=45)
+plt.yticks(tick_marks, [0,1,2])
+
+fmt = '.2f'
+thresh = cm.max() / 2.
+for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+    plt.text(j, i, format(cm[i, j], fmt),
+             horizontalalignment="center",
+             color="white" if cm[i, j] > thresh else "black")
+
+plt.tight_layout()
+plt.ylabel('True label')
+plt.savefig('./Result/' + name_experiment + '/' + 'confusion_matrix.png', dpi=900)
+plt.close()
+
+
+##F1 score
+F1_score = f1_score(y_true, y_scores, labels=None, average='micro', sample_weight=None)
+print("\nF1 score (micro): " +str(F1_score))
+
+
 #accuracy = 0
 #if float(np.sum(confusion))!=0:
 #    accuracy = float(confusion[0,0]+confusion[1,1])/float(np.sum(confusion))
@@ -204,9 +224,7 @@ import pdb; pdb.set_trace()
 #jaccard_index = jaccard_similarity_score(y_true, y_pred, normalize=True)
 #print "\nJaccard similarity score: " +str(jaccard_index)
 #
-##F1 score
-#F1_score = f1_score(y_true, y_pred, labels=None, average='binary', sample_weight=None)
-#print "\nF1 score (F-measure): " +str(F1_score)
+
 #
 ##Save the results
 #file_perf = open(path_experiment+'performances.txt', 'w')

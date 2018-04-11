@@ -150,10 +150,14 @@ def class_distribution_train(ground_truth):
 def pred_to_imgs(pred, full_image_height, full_image_width):
     assert (len(pred.shape)==2)  #3D array: (Npatches,height*width,2)
 
-    pred_image = np.empty((full_image_height, full_image_width,1))
+    #boundary is 2, inside is 1
+    #so, pred_image[:,:,0] is inside map
+    #pred_image[:,:,1] is bound map
+    pred_image = np.empty((full_image_height, full_image_width,2))
 
     for row in range(full_image_height):
         for col in range(full_image_width):
-            pred_image[row,col,0] = np.argmax(pred[row*full_image_width + col]) * 127 + 1
+            pred_image[row,col,0] = pred[row*full_image_width + col][1] * 255
+            pred_image[row,col,1] = pred[row*full_image_width + col][2] * 255
 
     return pred_image
