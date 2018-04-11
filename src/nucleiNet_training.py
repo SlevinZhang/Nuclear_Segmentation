@@ -156,7 +156,8 @@ N_subimgs = int(config.get('training settings', 'N_subimgs'))
 
 
 #model = get_nucleiNet(n_ch, patch_height, patch_width,learning_rate)  #the nucleiNet model
-model = get_resNet(n_ch, patch_height,patch_width,learning_rate) # the resNet model
+#model = get_resNet(n_ch, patch_height,patch_width,learning_rate) # the resNet model
+model = get_resNet(3,51,51,learning_rate)
 
 print(model.summary())
 
@@ -199,23 +200,19 @@ train_datagen = ImageDataGenerator(
         horizontal_flip = True,
         vertical_flip = True
         )
-train_datagen.flow_from_directory(
+train_datagen = train_datagen.flow_from_directory(
         './dataset/train_patches/',
         target_size=(51,51),
         class_mode = 'categorical',
         batch_size = 128,
-        shuffle = True
         )
-dev_datagen = ImageDataGenerator(
-        horizontal_flip = True,
-        vertical_flip = True
-        )
-dev_datagen.flow_from_directory(
+dev_datagen = ImageDataGenerator()
+       
+dev_datagen = dev_datagen.flow_from_directory(
         './dataset/dev_patches/',
         target_size = (51,51),
         class_mode = 'categorical',
         batch_size = 128,
-        shuffle = True
         )
 #========= Training =====================================
 
@@ -223,21 +220,24 @@ dev_datagen.flow_from_directory(
 #only save the best model performance on validation set
 checkpointer = ModelCheckpoint(filepath='./weights/' + name_experiment + '/' +name_experiment +'_best_weights.h5', verbose=1, monitor='val_loss', mode='auto', save_best_only=True) #save at each epoch if the validation decreased
 #early stop criteria, if the val_acc doesn't change after 10 epoches
-earlyStopping = EarlyStopping(monitor='val_loss',patience=10)
+earlyStopping = EarlyStopping(monitor='val_loss',patience=5)
 
 
 #History = model.fit(patches_imgs_train, patches_masks_train, epochs=N_epochs, 
 #          batch_size=batch_size, verbose=1, shuffle=True, validation_split=0.1, 
 #          callbacks=[checkpointer,earlyStopping])
-History= model.fit_generator(train_datagen, steps_per_epoch = 3375, epochs=N_epochs,
-                             validation_data = dev_datagen,validation_steps = 375,
-                             callbacks=[checkpointer, earlyStopping])
+model.fit_generator(train_datagen, steps_per_epoch = 3375, epochs=N_epochs, verbose = 1,
+                             validation_data = dev_datagen,
+                             validation_steps = 375,
+                             shuffle=True,
+			     callbacks=[checkpointer, earlyStopping]
+				)
 
 #========== Save and test the last model ===================
 model.save_weights('./weights/' + name_experiment + '/' + name_experiment + '_last_weights.h5', overwrite=True)
 
 
-print(History.history)
+#print(History.history)
 
 
 
