@@ -115,7 +115,8 @@ predictions = model.predict(patches_imgs_test, batch_size=32, verbose=2)
 print("predicted images size : {}".format(predictions.shape))
 #
 ##===== Convert the prediction arrays in corresponding images
-pred_image = pred_to_imgs(predictions, sample_img_height, sample_img_width)
+pred_bound_map,pred_inside_map = pred_to_imgs(predictions, sample_img_height, sample_img_width)
+
 #
 #
 #
@@ -131,8 +132,9 @@ pred_image = pred_to_imgs(predictions, sample_img_height, sample_img_width)
 #
 visualize(test_sample_img,'./Result/'+name_experiment + '/sample_pred_img.jpeg')
 visualize(test_sample_mask,'./Result/'+name_experiment+'/sample_pred_mask.jpeg')
-visualize(pred_image[:,:,0],'./Result/' + name_experiment + '/predict_prob_inside_map.jpeg')
-visualize(pred_image[:,:,1],'./Result/' + name_experiment + '/predict_prob_bound_map.jpeg')
+visualize(pred_bound_map,'./Result/' + name_experiment + '/predict_prob_bound_map.jpeg')
+visualize(pred_inside_map,'./Result/' + name_experiment + '/predict_prob_inside_map.jpeg')
+
 
 
 

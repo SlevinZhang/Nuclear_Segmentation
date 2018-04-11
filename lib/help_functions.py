@@ -40,9 +40,9 @@ def generate_ternary_masks(inside_mask, boundary_mask):
     for row in range(height):
         for col in range(width):
             if bound_arr[row,col] == True:
-                mask[row,col,0] = 128
-            elif inside_arr[row,col] == True:
                 mask[row,col,0] = 255
+            elif inside_arr[row,col] == True:
+                mask[row,col,0] = 128
             else:
                 mask[row,col,0] = 0
     return mask
@@ -153,11 +153,11 @@ def pred_to_imgs(pred, full_image_height, full_image_width):
     #boundary is 2, inside is 1
     #so, pred_image[:,:,0] is inside map
     #pred_image[:,:,1] is bound map
-    pred_image = np.empty((full_image_height, full_image_width,2))
-
+    pred_bound_map = np.empty((full_image_height, full_image_width,1))
+    pred_inside_map = np.empty((full_image_height, full_image_width,1))
     for row in range(full_image_height):
         for col in range(full_image_width):
-            pred_image[row,col,0] = pred[row*full_image_width + col][1] * 255
-            pred_image[row,col,1] = pred[row*full_image_width + col][2] * 255
+            pred_inside_map[row,col,0] = pred[row*full_image_width + col][1] * 255
+            pred_bound_map[row,col,0] = pred[row*full_image_width + col][2] * 255
 
-    return pred_image
+    return pred_bound_map,pred_inside_map
