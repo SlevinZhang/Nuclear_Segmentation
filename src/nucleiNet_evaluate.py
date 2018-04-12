@@ -7,6 +7,7 @@ Created on Wed Apr 11 17:31:05 2018
 from keras.models import model_from_json
 from keras.models import Model
 from keras.preprocessing.image import ImageDataGenerator
+from keras import optimizers
 #scikit learn
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
@@ -25,6 +26,7 @@ config.read('configuration.txt')
 #model name
 name_experiment = config.get('experiment name', 'name')
 
+learning_rate = float(config.get('training settings', 'learning_rate'))
 best_last = config.get('testing settings', 'best_last')
 #Load the saved model
 model = model_from_json(open('./model/' + name_experiment +'_architecture.json').read())
@@ -37,5 +39,8 @@ dev_datagen = dev_datagen.flow_from_directory(
         class_mode = 'categorical',
         batch_size = 128,
         )
-
+model.compile(optimizer=optimizers.Adam(lr=learning_rate, beta_1=0.9,
+                                                beta_2=0.99),
+                      loss='categorical_crossentropy',
+                      metrics=['accuracy','loss'])
 metrics = model.evaluate_generator(dev_datagen,steps = 375)
