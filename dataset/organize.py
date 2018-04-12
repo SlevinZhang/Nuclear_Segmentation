@@ -56,6 +56,10 @@ for folder in folders:
 #
 #train_imgs = glob.glob(train_dataset + '*.jpg')
 #index = 0
+#'2' is boundary
+#'1' is inside
+#'0' is background
+        
 #for filename in train_imgs:
 #    counter = {0:0,1:0,2:0}
 #    basename = os.path.basename(filename).split('.')[0]

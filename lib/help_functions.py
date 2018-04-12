@@ -153,11 +153,13 @@ def pred_to_imgs(pred, full_image_height, full_image_width):
     #boundary is 2, inside is 1
     #so, pred_image[:,:,0] is inside map
     #pred_image[:,:,1] is bound map
+    pred_img = np.empty((full_image_height, full_image_width, 1))
     pred_bound_map = np.empty((full_image_height, full_image_width,1))
     pred_inside_map = np.empty((full_image_height, full_image_width,1))
     for row in range(full_image_height):
         for col in range(full_image_width):
+            pred_img[row,col,0] = np.argmax(pred[row*full_image_width + col]) * 127 + 1
             pred_inside_map[row,col,0] = pred[row*full_image_width + col][1] * 255
             pred_bound_map[row,col,0] = pred[row*full_image_width + col][2] * 255
 
-    return pred_bound_map,pred_inside_map
+    return pred_img,pred_bound_map,pred_inside_map
