@@ -42,5 +42,6 @@ dev_datagen = dev_datagen.flow_from_directory(
 model.compile(optimizer=optimizers.Adam(lr=learning_rate, beta_1=0.9,
                                                 beta_2=0.99),
                       loss='categorical_crossentropy',
-                      metrics=['accuracy','loss'])
+                      metrics=['accuracy'])
 metrics = model.evaluate_generator(dev_datagen,steps = 375)
+print("metrics: {}".format(metrics))
