@@ -130,10 +130,10 @@ pred_bound_map,pred_inside_map = pred_to_imgs(predictions, sample_img_height, sa
 #visualize(boundary_map, './Result/' + name_experiment + '/' + 'predict_boundary_map.jpeg')
 #visualize(inside_map, './Result/' + name_experiment + '/' + 'predict_inside_map.jpeg')
 #
-visualize(test_sample_img,'./Result/'+name_experiment + '/sample_pred_img.jpeg')
-visualize(test_sample_mask,'./Result/'+name_experiment+'/sample_pred_mask.jpeg')
-visualize(pred_bound_map,'./Result/' + name_experiment + '/predict_prob_bound_map.jpeg')
-visualize(pred_inside_map,'./Result/' + name_experiment + '/predict_prob_inside_map.jpeg')
+visualize(test_sample_img,'./Result/'+name_experiment + '/sample_pred_img')
+visualize(test_sample_mask,'./Result/'+name_experiment+'/sample_pred_mask')
+visualize(pred_bound_map,'./Result/' + name_experiment + '/predict_prob_bound_map')
+visualize(pred_inside_map,'./Result/' + name_experiment + '/predict_prob_inside_map')
 
 
 
@@ -147,8 +147,8 @@ acc = accuracy_score(y_true,y_scores)
 print("Accuracy: {}".format(acc))
 #
 ##Area under the ROC curve
-fpr, tpr, thresholds = roc_curve((y_true), y_scores)
-AUC_ROC = roc_auc_score(y_true, y_scores)
+fpr, tpr, thresholds = roc_curve(y_true, y_scores,pos_label=2)
+AUC_ROC = roc_auc_score(y_true, y_scores,'micro')
 # test_integral = np.trapz(tpr,fpr) #trapz is numpy integration
 print("\nArea under the ROC curve: " +str(AUC_ROC))
 #
