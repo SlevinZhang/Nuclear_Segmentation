@@ -148,12 +148,12 @@ print("Accuracy: {}".format(acc))
 #
 ##Area under the ROC curve
 fpr, tpr, thresholds = roc_curve(y_true, y_scores,pos_label=2)
-AUC_ROC = roc_auc_score(y_true, y_scores)
-# test_integral = np.trapz(tpr,fpr) #trapz is numpy integration
-print("\nArea under the ROC curve: " +str(AUC_ROC))
+#AUC_ROC = roc_auc_score(y_true, y_scores)
+## test_integral = np.trapz(tpr,fpr) #trapz is numpy integration
+#print("\nArea under the ROC curve: " +str(AUC_ROC))
 #
 roc_curve =plt.figure()
-plt.plot(fpr,tpr,'-',label='Area Under the Curve (AUC = %0.4f)' % AUC_ROC)
+plt.plot(fpr,tpr,'-')
 plt.title('ROC curve')
 plt.xlabel("FPR (False Positive Rate) or 1 - specificity")
 plt.ylabel("TPR (True Positive Rate) or sensitivity")
