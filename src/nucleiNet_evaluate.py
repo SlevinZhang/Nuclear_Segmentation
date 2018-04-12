@@ -38,4 +38,4 @@ dev_datagen = dev_datagen.flow_from_directory(
         batch_size = 128,
         )
 
-metrics = model.evaluate_generator(dev_datagen,steps = 375,verbose=1)
+metrics = model.evaluate_generator(dev_datagen,steps = 375)
