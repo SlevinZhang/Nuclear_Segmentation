@@ -55,9 +55,9 @@ test_mode = 'single'
 
 if test_mode == 'single':
     
-    test_img_filename = './dataset/test_same_organ/TCGA-49-4488-01Z-00-DX1.jpg'
-    boundary_filename = './dataset/test_same_organ_mask/' + os.path.basename(test_img_filename).split('.')[0] + '_mask_bound.bmp'
-    inside_filename = './dataset/intBinMask/' + os.path.basename(test_img_filename).split('.')[0] + '_mask_inside.bmp'
+    test_img_filename = './dataset/train/TCGA-18-5592-01Z-00-DX1.jpg'
+    boundary_filename = './dataset/train_mask/' + os.path.basename(test_img_filename).split('.')[0] + '_mask_bound.bmp'
+    inside_filename = './dataset/train_mask/' + os.path.basename(test_img_filename).split('.')[0] + '_mask_inside.bmp'
     Imgs_to_test = 1
     
 else:
