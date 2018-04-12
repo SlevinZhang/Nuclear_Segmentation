@@ -7,7 +7,7 @@ test_groundTruth = sameorgan_masks_test.hdf5
 
 
 [experiment name]
-name = train_normalized_images
+name = train_original_images
 
 
 [data attributes]

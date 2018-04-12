@@ -50,7 +50,7 @@ def get_datasets(imgs_dir,mask_dir,Nimgs):
     imgs = np.empty((Nimgs,height,width,channels))
     masks = np.empty((Nimgs,height,width,1))
 
-    image_filenames = glob.glob(imgs_dir + '*.jpeg')
+    image_filenames = glob.glob(imgs_dir + '*.jpg')
     for index,filename in enumerate(image_filenames):
         basename = os.path.basename(filename)
         print("original image: " + basename)
