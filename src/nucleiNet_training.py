@@ -127,13 +127,13 @@ N_subimgs = int(config.get('training settings', 'N_subimgs'))
 
 
 #============ Load the data and divided in patches
-#patches_imgs_train, patches_masks_train = get_data_training(
-#    hdf5_train_imgs = path_data + config.get('data paths', 'train_imgs_original'),
-#    hdf5_train_groundTruth = path_data + config.get('data paths', 'train_groundTruth'),  #masks
-#    patch_height = int(config.get('data attributes', 'patch_height')),
-#    patch_width = int(config.get('data attributes', 'patch_width')),
-#    N_subimgs = N_subimgs
-#)
+patches_imgs_train, patches_masks_train = get_data_training(
+    hdf5_train_imgs = path_data + config.get('data paths', 'train_imgs_original'),
+    hdf5_train_groundTruth = path_data + config.get('data paths', 'train_groundTruth'),  #masks
+    patch_height = int(config.get('data attributes', 'patch_height')),
+    patch_width = int(config.get('data attributes', 'patch_width')),
+    N_subimgs = N_subimgs
+)
 
 
 #===============================Load in normaized data======================================
@@ -144,15 +144,15 @@ N_subimgs = int(config.get('training settings', 'N_subimgs'))
 
 
 #========= Save and visualize a sample of what you're feeding to the neural network ==========
-#N_sample = 40
-#visualize(group_images(patches_imgs_train[0:N_sample,:,:,:],5),'./Result/'+name_experiment+'/'+"sample_input_imgs")#.show()
-#visualize(group_images(patches_masks_train[0:N_sample,:,:,:],5),'./Result/'+name_experiment+'/'+"sample_input_mask")#.show()
+N_sample = 40
+visualize(group_images(patches_imgs_train[0:N_sample,:,:,:],5),'./Result/'+name_experiment+'/'+"sample_input_imgs")#.show()
+visualize(group_images(patches_masks_train[0:N_sample,:,:,:],5),'./Result/'+name_experiment+'/'+"sample_input_mask")#.show()
 
 
 #=========== Construct and save the model arcitecture =====
-#patch_height = patches_imgs_train.shape[1]
-#patch_width = patches_imgs_train.shape[2]
-#n_ch = patches_imgs_train.shape[3]
+patch_height = patches_imgs_train.shape[1]
+patch_width = patches_imgs_train.shape[2]
+n_ch = patches_imgs_train.shape[3]
 
 
 #model = get_nucleiNet(n_ch, patch_height, patch_width,learning_rate)  #the nucleiNet model
@@ -184,8 +184,8 @@ else:
 
 
 #==============Calculate class distribution in patches===========================
-#patches_masks_train = masks_nucleiNet(patches_masks_train)
-#class_distribution_train(patches_masks_train)
+patches_masks_train = masks_nucleiNet(patches_masks_train)
+class_distribution_train(patches_masks_train)
 
 
 print("Done with parse masks")
@@ -196,24 +196,24 @@ print("Done with parse masks")
 #        horizontal_flip = True,
 #        vertical_flip = True,
 #        data_format='channels_first')
-train_datagen = ImageDataGenerator(
-        horizontal_flip = True,
-        vertical_flip = True
-        )
-train_datagen = train_datagen.flow_from_directory(
-        './dataset/train_patches/',
-        target_size=(51,51),
-        class_mode = 'categorical',
-        batch_size = 128,
-        )
-dev_datagen = ImageDataGenerator()
-       
-dev_datagen = dev_datagen.flow_from_directory(
-        './dataset/dev_patches/',
-        target_size = (51,51),
-        class_mode = 'categorical',
-        batch_size = 128,
-        )
+#train_datagen = ImageDataGenerator(
+#        horizontal_flip = True,
+#        vertical_flip = True
+#        )
+#train_datagen = train_datagen.flow_from_directory(
+#        './dataset/train_patches/',
+#        target_size=(51,51),
+#        class_mode = 'categorical',
+#        batch_size = 128,
+#        )
+#dev_datagen = ImageDataGenerator()
+#       
+#dev_datagen = dev_datagen.flow_from_directory(
+#        './dataset/dev_patches/',
+#        target_size = (51,51),
+#        class_mode = 'categorical',
+#        batch_size = 128,
+#        )
 #========= Training =====================================
 
 
@@ -223,16 +223,16 @@ checkpointer = ModelCheckpoint(filepath='./weights/' + name_experiment + '/' +na
 earlyStopping = EarlyStopping(monitor='val_loss',patience=5)
 
 
-#History = model.fit(patches_imgs_train, patches_masks_train, epochs=N_epochs, 
-#          batch_size=batch_size, verbose=1, shuffle=True, validation_split=0.1, 
-#          callbacks=[checkpointer,earlyStopping])
-model.fit_generator(train_datagen, steps_per_epoch = 3375, epochs=N_epochs, verbose = 1,
-                             validation_data = dev_datagen,
-                             validation_steps = 375,
-                             shuffle=True,
-			     callbacks=[checkpointer, earlyStopping]
-				)
-
+History = model.fit(patches_imgs_train, patches_masks_train, epochs=N_epochs, 
+          batch_size=batch_size, verbose=1, shuffle=True, validation_split=0.1, 
+          callbacks=[checkpointer,earlyStopping])
+#model.fit_generator(train_datagen, steps_per_epoch = 3375, epochs=N_epochs, verbose = 1,
+#                             validation_data = dev_datagen,
+#                             validation_steps = 375,
+#                             shuffle=True,
+#			     callbacks=[checkpointer, earlyStopping]
+#				)
+#
 #========== Save and test the last model ===================
 model.save_weights('./weights/' + name_experiment + '/' + name_experiment + '_last_weights.h5', overwrite=True)
 
