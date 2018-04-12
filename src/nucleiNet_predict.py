@@ -148,7 +148,7 @@ print("Accuracy: {}".format(acc))
 #
 ##Area under the ROC curve
 fpr, tpr, thresholds = roc_curve(y_true, y_scores,pos_label=2)
-AUC_ROC = roc_auc_score(y_true, y_scores,'micro')
+AUC_ROC = roc_auc_score(y_true, y_scores)
 # test_integral = np.trapz(tpr,fpr) #trapz is numpy integration
 print("\nArea under the ROC curve: " +str(AUC_ROC))
 #
@@ -201,8 +201,9 @@ plt.close()
 
 
 ##F1 score
-F1_score = f1_score(y_true, y_scores, labels=None, average='micro', sample_weight=None)
-print("\nF1 score (micro): " +str(F1_score))
+F1_score = f1_score(y_true, y_scores, average=None)
+print("\nF1 score (for each class):{} ".format(F1_score))
+
 
 
 #accuracy = 0
