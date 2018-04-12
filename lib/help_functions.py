@@ -105,7 +105,7 @@ def masks_nucleiNet(masks):
                 new_masks[i,0]=1
                 new_masks[i,1]=0
                 new_masks[i,2]=0
-            elif masks[i,int(im_h/2),int(im_w/2),0] == 128:
+            elif masks[i,int(im_h/2),int(im_w/2),0] == 127:
                 new_masks[i,0]=0
                 new_masks[i,1]=1
                 new_masks[i,2]=0

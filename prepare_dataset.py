@@ -150,11 +150,11 @@ if __name__ == '__main__':
     if not os.path.exists(dataset_root):
         os.makedirs(dataset_root)
 #===============================Get Original dataset ==============================================
-    train_images = './dataset/train_images/'
-    mask_path = './dataset/intBinMask/'
+    train_images = './dataset/train/'
+    mask_path = './dataset/train_mask/'
     
     #Get training dataset
-    imgs_train, masks_train = get_datasets(train_images, mask_path,24)
+    imgs_train, masks_train = get_datasets(train_images, mask_path,16)
     write_hdf5(imgs_train,dataset_root + 'dataset_imgs_train.hdf5')
     write_hdf5(masks_train,dataset_root + 'dataset_masks_train.hdf5')
     
