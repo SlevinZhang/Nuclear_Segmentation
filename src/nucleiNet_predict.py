@@ -147,19 +147,19 @@ acc = accuracy_score(y_true,y_scores)
 print("Accuracy: {}".format(acc))
 #
 ##Area under the ROC curve
-fpr, tpr, thresholds = roc_curve(y_true, y_scores,pos_label=2)
-#AUC_ROC = roc_auc_score(y_true, y_scores)
-## test_integral = np.trapz(tpr,fpr) #trapz is numpy integration
-#print("\nArea under the ROC curve: " +str(AUC_ROC))
+#fpr, tpr, thresholds = roc_curve(y_true, y_scores,pos_label=2)
+##AUC_ROC = roc_auc_score(y_true, y_scores)
+### test_integral = np.trapz(tpr,fpr) #trapz is numpy integration
+##print("\nArea under the ROC curve: " +str(AUC_ROC))
+##
+#roc_curve =plt.figure(1)
+#plt.plot(fpr,tpr,'-')
+#plt.title('ROC curve')
+#plt.xlabel("FPR (False Positive Rate) or 1 - specificity")
+#plt.ylabel("TPR (True Positive Rate) or sensitivity")
+#plt.legend(loc="lower right")
+#plt.savefig('./Result/' + name_experiment + '/' + "ROC.png")
 #
-roc_curve =plt.figure()
-plt.plot(fpr,tpr,'-')
-plt.title('ROC curve')
-plt.xlabel("FPR (False Positive Rate) or 1 - specificity")
-plt.ylabel("TPR (True Positive Rate) or sensitivity")
-plt.legend(loc="lower right")
-plt.savefig('./Result/' + name_experiment + '/' + "ROC.png")
-
 
 ##Precision-recall curve
 #precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
@@ -176,34 +176,34 @@ plt.savefig('./Result/' + name_experiment + '/' + "ROC.png")
 #plt.savefig(path_experiment+"Precision_recall.png")
 #
 ##Confusion matrix
-cm = confusion_matrix(y_true,y_scores)
-
-cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-
-plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-plt.title('Confusion Matrix')
-plt.colorbar()
-tick_marks = np.arange(len(3))
-plt.xticks(tick_marks, [0,1,2], rotation=45)
-plt.yticks(tick_marks, [0,1,2])
-
-fmt = '.2f'
-thresh = cm.max() / 2.
-for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-    plt.text(j, i, format(cm[i, j], fmt),
-             horizontalalignment="center",
-             color="white" if cm[i, j] > thresh else "black")
-
-plt.tight_layout()
-plt.ylabel('True label')
-plt.savefig('./Result/' + name_experiment + '/' + 'confusion_matrix.png', dpi=900)
-plt.close()
-
-
-##F1 score
-F1_score = f1_score(y_true, y_scores, average=None)
-print("\nF1 score (for each class):{} ".format(F1_score))
-
+#cm = confusion_matrix(y_true,y_scores)
+#
+#cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+#
+#plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+#plt.title('Confusion Matrix')
+#plt.colorbar()
+#tick_marks = np.arange(len(3))
+#plt.xticks(tick_marks, [0,1,2], rotation=45)
+#plt.yticks(tick_marks, [0,1,2])
+#
+#fmt = '.2f'
+#thresh = cm.max() / 2.
+#for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+#    plt.text(j, i, format(cm[i, j], fmt),
+#             horizontalalignment="center",
+#             color="white" if cm[i, j] > thresh else "black")
+#
+#plt.tight_layout()
+#plt.ylabel('True label')
+#plt.savefig('./Result/' + name_experiment + '/' + 'confusion_matrix.png', dpi=900)
+#plt.close()
+#
+#
+###F1 score
+#F1_score = f1_score(y_true, y_scores, average=None)
+#print("\nF1 score (for each class):{} ".format(F1_score))
+#
 
 
 #accuracy = 0
