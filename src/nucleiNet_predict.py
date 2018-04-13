@@ -34,6 +34,7 @@ from extract_patches import get_data_predict
 from PIL import Image
 import os
 import itertools
+import glob
 
 #========= CONFIG FILE TO READ FROM =======
 config = configparser.RawConfigParser()
@@ -61,14 +62,14 @@ if test_mode == 'single':
     Imgs_to_test = 1
     
 else:
+    #test all images in test_same_organ and test_diff_organ
+    #report the accuracy for each image
+    test_same_organ = './dataset/test_same_organ/'
+    test_same_organ_mask = './dataset/test_diff_organ_mask/'
+    test_diff_organ = './dataset/test_diff_organ/'
+    test_diff_organ = './dataset/test_diff_organ_mask/'
     
-    test_imgs_filename = path_data + config.get('data paths', 'test_imgs_original')
-    test_masks_filename = path_data + config.get('data paths', 'test_groundTruth')
-    #N full images to be predicted
-    Imgs_to_test = int(config.get('testing settings', 'full_images_to_test'))
     
-    test_imgs = load_hdf5(test_imgs_filename)
-    test_masks = load_hdf5(test_masks_filename)
 
 
 
@@ -94,29 +95,53 @@ if test_mode == 'single':
     )
     
 else:
-    patches_imgs_test, patches_masks_test = get_data_predict(
-        hdf5_predict_imgs = test_imgs_filename,  #original
-        hdf5_predict_groundTruth = test_masks_filename,  #masks
-        patch_height = patch_height,
-        patch_width = patch_width,
-        N_imgs = Imgs_to_test
-    )
-
-
-#================ Run the prediction of the patches ==================================
-best_last = config.get('testing settings', 'best_last')
-#Load the saved model
-model = model_from_json(open('./model/' + name_experiment +'_architecture.json').read())
-model.load_weights('./weights/' + name_experiment + '/' + name_experiment + '_'+best_last+'_weights.h5')
-
-#Calculate the predictions
-predictions = model.predict(patches_imgs_test, batch_size=32, verbose=2)
-#
-print("predicted images size : {}".format(predictions.shape))
-#
-##===== Convert the prediction arrays in corresponding images
-pred_img,pred_bound_map,pred_inside_map = pred_to_imgs(predictions, sample_img_height, sample_img_width)
-
+    #test same organ
+     #================ Run the prediction of the patches ==================================
+    best_last = config.get('testing settings', 'best_last')
+    #Load the saved model
+    model = model_from_json(open('./model/' + name_experiment +'_architecture.json').read())
+    model.load_weights('./weights/' + name_experiment + '/' + name_experiment + '_'+best_last+'_weights.h5')
+        
+    test_same_organ_filenames = glob.glob(test_same_organ)
+    for filename in test_same_organ_filenames:
+        basename = os.path.basename(filename)
+        print("test {}".format(os.path.basename(filename)))
+        test_image = np.asarray(Image.open(filename))
+        test_mask = generate_ternary_masks(
+                test_same_organ_mask + os.path.basename(filename).split('.')[0] + '_mask_inside.bmp',
+                test_same_organ_mask + os.path.basename(filename).split('.')[0] + '_mask_bound.bmp'
+                )
+        test_sample_img = test_image[400:800,400:800,:]
+        test_sample_mask = test_mask[400:800,400:800,:]
+        
+        patches_imgs_test, patches_masks_test = get_data_predict(
+            hdf5_predict_imgs = test_sample_img,  #original
+            hdf5_predict_groundTruth = test_sample_mask,  #masks
+            patch_height = patch_height,
+            patch_width = patch_width,
+            N_imgs = Imgs_to_test
+            )
+       
+        #Calculate the predictions
+        predictions = model.predict(patches_imgs_test, batch_size=32, verbose=2)
+        #
+        print("predicted images size : {}".format(predictions.shape))
+        #
+        ##===== Convert the prediction arrays in corresponding images
+        pred_img,pred_bound_map,pred_inside_map = pred_to_imgs(predictions, sample_img_height, sample_img_width)
+        
+        visualize(test_sample_img,'./Result/'+name_experiment + '/' + basename + '_sample_pred_img')
+        visualize(test_sample_mask,'./Result/'+name_experiment+'/' + basename + '_sample_pred_mask')
+        visualize(pred_bound_map,'./Result/' + name_experiment + '/' + basename +'_predict_prob_bound_map')
+        visualize(pred_inside_map,'./Result/' + name_experiment + '/' + basename + '_predict_prob_inside_map')
+        visualize(pred_img,'./Result/' + name_experiment + '/' + basename + '_predict_prob_img')
+        #====== Evaluate the results
+        print("\n\n========  Evaluate the results =======================")
+        y_scores = np.reshape(np.argmax(predictions,axis=1),[-1,1])
+        y_true = patches_masks_test
+        
+        acc = accuracy_score(y_true,y_scores)
+        print("Accuracy: {}".format(acc))
 #
 #
 #
@@ -130,21 +155,11 @@ pred_img,pred_bound_map,pred_inside_map = pred_to_imgs(predictions, sample_img_h
 #visualize(boundary_map, './Result/' + name_experiment + '/' + 'predict_boundary_map.jpeg')
 #visualize(inside_map, './Result/' + name_experiment + '/' + 'predict_inside_map.jpeg')
 #
-visualize(test_sample_img,'./Result/'+name_experiment + '/sample_pred_img')
-visualize(test_sample_mask,'./Result/'+name_experiment+'/sample_pred_mask')
-visualize(pred_bound_map,'./Result/' + name_experiment + '/predict_prob_bound_map')
-visualize(pred_inside_map,'./Result/' + name_experiment + '/predict_prob_inside_map')
-visualize(pred_img,'./Result/' + name_experiment + '/predict_prob_img')
 
 
 
-#====== Evaluate the results
-print("\n\n========  Evaluate the results =======================")
-y_scores = np.reshape(np.argmax(predictions,axis=1),[-1,1])
-y_true = patches_masks_test
 
-acc = accuracy_score(y_true,y_scores)
-print("Accuracy: {}".format(acc))
+
 #
 ##Area under the ROC curve
 #fpr, tpr, thresholds = roc_curve(y_true, y_scores,pos_label=2)
