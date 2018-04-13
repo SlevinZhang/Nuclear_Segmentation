@@ -65,7 +65,7 @@ else:
     #test all images in test_same_organ and test_diff_organ
     #report the accuracy for each image
     test_same_organ = './dataset/test_same_organ/'
-    test_same_organ_mask = './dataset/test_diff_organ_mask/'
+    test_same_organ_mask = './dataset/test_same_organ_mask/'
     test_diff_organ = './dataset/test_diff_organ/'
     test_diff_organ = './dataset/test_diff_organ_mask/'
     
