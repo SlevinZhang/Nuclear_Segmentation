@@ -52,7 +52,7 @@ name_experiment = config.get('experiment name', 'name')
 
 
 #==========predict one image at a time, or predict all images in test folder ==================
-test_mode = 'single'
+test_mode = 'multi'
 
 if test_mode == 'single':
     
