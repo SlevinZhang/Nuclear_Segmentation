@@ -116,8 +116,8 @@ else:
         test_sample_mask = test_mask[400:800,400:800,:]
         
         patches_imgs_test, patches_masks_test = get_data_predict(
-            hdf5_predict_imgs = test_sample_img,  #original
-            hdf5_predict_groundTruth = test_sample_mask,  #masks
+            predict_imgs = test_sample_img,  #original
+            predict_groundTruth = test_sample_mask,  #masks
             patch_height = patch_height,
             patch_width = patch_width,
             N_imgs = 1
