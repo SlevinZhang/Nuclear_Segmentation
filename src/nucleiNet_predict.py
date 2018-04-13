@@ -115,6 +115,8 @@ else:
         test_sample_img = test_image[400:800,400:800,:]
         test_sample_mask = test_mask[400:800,400:800,:]
         
+        [sample_img_height,sample_img_width, sam_channel] = test_sample_img.shape
+        
         patches_imgs_test, patches_masks_test = get_data_predict(
             predict_imgs = test_sample_img,  #original
             predict_groundTruth = test_sample_mask,  #masks
