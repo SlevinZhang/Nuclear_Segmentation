@@ -120,7 +120,7 @@ else:
             hdf5_predict_groundTruth = test_sample_mask,  #masks
             patch_height = patch_height,
             patch_width = patch_width,
-            N_imgs = Imgs_to_test
+            N_imgs = 1
             )
        
         #Calculate the predictions
