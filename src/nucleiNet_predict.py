@@ -102,7 +102,8 @@ else:
     model = model_from_json(open('./model/' + name_experiment +'_architecture.json').read())
     model.load_weights('./weights/' + name_experiment + '/' + name_experiment + '_'+best_last+'_weights.h5')
         
-    test_same_organ_filenames = glob.glob(test_same_organ)
+    test_same_organ_filenames = glob.glob(test_same_organ + '*.jpg')
+    print(test_same_organ_filenames)
     for filename in test_same_organ_filenames:
         basename = os.path.basename(filename)
         print("test {}".format(os.path.basename(filename)))
